@@ -58,7 +58,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     // Google Fonts
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.9.4")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.9.5")
 
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
@@ -70,16 +70,16 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 
     // DI with Hilt
-    implementation("com.google.dagger:hilt-android:2.57.1")
-    ksp("com.google.dagger:hilt-android-compiler:2.57.1")
+    implementation("com.google.dagger:hilt-android:2.57.2")
+    ksp("com.google.dagger:hilt-android-compiler:2.57.2")
 
     // Room Database
-    implementation("androidx.room:room-runtime:2.8.3")
+    implementation("androidx.room:room-runtime:2.8.4")
     ksp("androidx.room:room-compiler:2.8.3")
-    implementation("androidx.room:room-ktx:2.8.3")
+    implementation("androidx.room:room-ktx:2.8.4")
 
     // DataStore
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("androidx.datastore:datastore-preferences:1.2.0")
 
     // Retrofit
     // repo: https://github.com/square/retrofit
