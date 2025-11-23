@@ -18,7 +18,7 @@ android {
         minSdk = 31
         targetSdk = 36
         versionCode = 1
-        versionName = "v0.0.3"
+        versionName = "v0.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -76,6 +76,9 @@ dependencies {
     // DI with Hilt
     implementation("com.google.dagger:hilt-android:2.57.2")
     ksp("com.google.dagger:hilt-android-compiler:2.57.2")
+
+    // Hilt with Navigation
+    implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
 
     // Room Database
     implementation("androidx.room:room-runtime:2.8.4")

@@ -27,11 +27,13 @@ abstract class SolatDatabase : RoomDatabase() {
 
         fun getDatabase(context: Context): SolatDatabase {
             return Instance ?: synchronized(lock = this) {
-                Room.databaseBuilder(
-                    context = context,
-                    klass = SolatDatabase::class.java,
-                    name = "solat_database"
-                ).build().also { Instance = it }
+                Room
+                    .databaseBuilder(
+                        context = context,
+                        klass = SolatDatabase::class.java,
+                        name = "solat_database"
+                    )
+                    .build().also { Instance = it }
             }
         }
     }
