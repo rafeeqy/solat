@@ -12,7 +12,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SolatTheme {
-                // TODO: Solat App here...
+                SolatApp()
             }
         }
     }

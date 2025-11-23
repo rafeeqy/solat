@@ -1,6 +1,7 @@
 package com.example.solat.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,6 +31,7 @@ import com.example.solat.ui.theme.SolatTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZoneLocationScreen(
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -37,7 +40,7 @@ fun ZoneLocationScreen(
             TopAppBar(
                 title = { Text(text = "Select prayer zone") },
                 navigationIcon = {
-                    IconButton(onClick = { /* TODO: Navigate back */ }) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = "Arrow back"
@@ -72,7 +75,11 @@ fun ZoneLocationScreen(
             items(count = 7) {
                 ListItem(
                     headlineContent = { Text(text = "Zone: KDH01") },
-                    modifier = Modifier,
+                    modifier = Modifier.clickable(
+                        enabled = true,
+                        role = Role.DropdownList,
+                        onClick = { /* TODO: Select zone location */ }
+                    ),
                     supportingContent = { Text(text = "Kota Setar, Kubang Pasu, Pokok Sena (Daerah Kecil)") },
                     trailingContent = {
                         RadioButton(
@@ -91,6 +98,8 @@ fun ZoneLocationScreen(
 @Composable
 private fun ZoneLocationScreenPreview() {
     SolatTheme {
-        ZoneLocationScreen()
+        ZoneLocationScreen(
+            onNavigateBack = {}
+        )
     }
 }
