@@ -42,15 +42,17 @@ import com.example.solat.ui.theme.SolatTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
+    onNavigateToSettings: () -> Unit,
+    onNavigateToZoneLocation: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { /* TODO: ??? */ },
+                title = { /* NOTE: Leave this empty... */ },
                 actions = {
-                    IconButton(onClick = { /* TODO: ??? */ }) {
+                    IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Rounded.Settings,
                             contentDescription = "Settings"
@@ -79,7 +81,10 @@ fun MainScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         DateButton()
-                        ZoneLocationButton(modifier = Modifier.fillMaxWidth(.5f))
+                        ZoneLocationButton(
+                            onClick = onNavigateToZoneLocation,
+                            modifier = Modifier.fillMaxWidth(.5f)
+                        )
                     }
                     // Next prayer
                     Column(
@@ -115,7 +120,7 @@ private fun DateButton(
     modifier: Modifier = Modifier
 ) {
     TextButton(
-        onClick = { /* TODO: ??? */ },
+        onClick = { /* NOTE: Do nothing for now... */ },
         modifier = modifier,
         enabled = false,
         colors = ButtonDefaults.textButtonColors().copy(
@@ -148,10 +153,11 @@ private fun DateButton(
 
 @Composable
 private fun ZoneLocationButton(
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Button(
-        onClick = { /* TODO: ??? */ },
+        onClick = onClick,
         modifier = modifier
     ) {
         Row(
@@ -313,6 +319,9 @@ private fun PrayerTimeCard(
 @Composable
 private fun MainScreenPreview() {
     SolatTheme {
-        MainScreen()
+        MainScreen(
+            onNavigateToSettings = {},
+            onNavigateToZoneLocation = {}
+        )
     }
 }

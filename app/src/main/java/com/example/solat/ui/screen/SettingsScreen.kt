@@ -49,6 +49,8 @@ import com.example.solat.ui.theme.SolatTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    onNavigateBack: () -> Unit,
+    onNavigateToZoneLocation: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var openThemeSelection by remember { mutableStateOf(false) }
@@ -61,7 +63,7 @@ fun SettingsScreen(
             TopAppBar(
                 title = { Text(text = "Settings") },
                 navigationIcon = {
-                    IconButton(onClick = { /* TODO: Navigate back */ }) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = "Arrow back"
@@ -84,7 +86,7 @@ fun SettingsScreen(
                         modifier = Modifier.clickable(
                             enabled = true,
                             role = Role.DropdownList,
-                            onClick = { /* TODO: Navigate to ZoneLocation screen */ }
+                            onClick = onNavigateToZoneLocation
                         ),
                         supportingContent = { Text(text = "Set location based on JAKIM zones") },
                         leadingContent = {
@@ -277,6 +279,9 @@ fun SettingsScreen(
 @Composable
 private fun SettingsScreenPreview() {
     SolatTheme {
-        SettingsScreen()
+        SettingsScreen(
+            onNavigateBack = {},
+            onNavigateToZoneLocation = {}
+        )
     }
 }
