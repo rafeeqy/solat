@@ -32,9 +32,9 @@ data class PrayerDetails(
     @ColumnInfo(name = "api_last_updated")
     val apiLastUpdated: String? = null,
     @ColumnInfo(name = "created_date")
-    val createdDate: String,
+    val createdDate: Long,
     @ColumnInfo(name = "updated_date")
-    val updatedDate: String? = null,
+    val updatedDate: Long? = null,
     @ColumnInfo(name = "deleted_date")
-    val deletedDate: String? = null
+    val deletedDate: Long? = null
 )

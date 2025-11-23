@@ -1,0 +1,275 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "93bd0442bca9d844ba2368843aa3ee82",
+    "entities": [
+      {
+        "tableName": "zone",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`zone_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `code` TEXT NOT NULL, `state` TEXT NOT NULL, `district` TEXT NOT NULL, `created_date` INTEGER NOT NULL, `updated_date` INTEGER, `deleted_date` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "zoneId",
+            "columnName": "zone_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "state",
+            "columnName": "state",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "district",
+            "columnName": "district",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdDate",
+            "columnName": "created_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedDate",
+            "columnName": "updated_date",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "deletedDate",
+            "columnName": "deleted_date",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "zone_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_zone_code",
+            "unique": true,
+            "columnNames": [
+              "code"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_zone_code` ON `${TABLE_NAME}` (`code`)"
+          }
+        ]
+      },
+      {
+        "tableName": "prayer_details",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`prayer_details_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `zone_id` INTEGER NOT NULL, `year` INTEGER NOT NULL, `month` TEXT NOT NULL, `month_number` INTEGER NOT NULL, `api_last_updated` TEXT, `created_date` INTEGER NOT NULL, `updated_date` INTEGER, `deleted_date` INTEGER, FOREIGN KEY(`zone_id`) REFERENCES `zone`(`zone_id`) ON UPDATE RESTRICT ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "prayerDetailsId",
+            "columnName": "prayer_details_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneId",
+            "columnName": "zone_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "year",
+            "columnName": "year",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "month",
+            "columnName": "month",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "monthNumber",
+            "columnName": "month_number",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apiLastUpdated",
+            "columnName": "api_last_updated",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdDate",
+            "columnName": "created_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedDate",
+            "columnName": "updated_date",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "deletedDate",
+            "columnName": "deleted_date",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "prayer_details_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_prayer_details_zone_id",
+            "unique": false,
+            "columnNames": [
+              "zone_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_prayer_details_zone_id` ON `${TABLE_NAME}` (`zone_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "zone",
+            "onDelete": "CASCADE",
+            "onUpdate": "RESTRICT",
+            "columns": [
+              "zone_id"
+            ],
+            "referencedColumns": [
+              "zone_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "prayer_time",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`prayer_time_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `prayer_details_id` INTEGER NOT NULL, `day` INTEGER NOT NULL, `hijri` TEXT NOT NULL, `fajr` INTEGER NOT NULL, `syuruk` INTEGER NOT NULL, `dhuhr` INTEGER NOT NULL, `asr` INTEGER NOT NULL, `maghrib` INTEGER NOT NULL, `isha` INTEGER NOT NULL, `created_date` INTEGER NOT NULL, `updated_date` INTEGER, `deleted_date` INTEGER, FOREIGN KEY(`prayer_details_id`) REFERENCES `prayer_details`(`prayer_details_id`) ON UPDATE RESTRICT ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "prayerTimeId",
+            "columnName": "prayer_time_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prayerDetailsId",
+            "columnName": "prayer_details_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "day",
+            "columnName": "day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hijri",
+            "columnName": "hijri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fajr",
+            "columnName": "fajr",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syuruk",
+            "columnName": "syuruk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dhuhr",
+            "columnName": "dhuhr",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "asr",
+            "columnName": "asr",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maghrib",
+            "columnName": "maghrib",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isha",
+            "columnName": "isha",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdDate",
+            "columnName": "created_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedDate",
+            "columnName": "updated_date",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "deletedDate",
+            "columnName": "deleted_date",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "prayer_time_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_prayer_time_prayer_details_id",
+            "unique": false,
+            "columnNames": [
+              "prayer_details_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_prayer_time_prayer_details_id` ON `${TABLE_NAME}` (`prayer_details_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "prayer_details",
+            "onDelete": "CASCADE",
+            "onUpdate": "RESTRICT",
+            "columns": [
+              "prayer_details_id"
+            ],
+            "referencedColumns": [
+              "prayer_details_id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '93bd0442bca9d844ba2368843aa3ee82')"
+    ]
+  }
+}

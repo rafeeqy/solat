@@ -196,7 +196,7 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.labelLarge
                     )
                     Text(
-                        text = "v0.0.1 (2025-11-22 20:17:40)",
+                        text = "v0.0.3 (2025-11-23 20:07:40)",
                         color = MaterialTheme.colorScheme.secondary,
                         style = MaterialTheme.typography.labelMedium
                     )
