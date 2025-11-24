@@ -24,9 +24,14 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
@@ -40,6 +45,8 @@ import com.example.solat.ui.component.LoadingContent
 import com.example.solat.ui.theme.SolatTheme
 import com.example.solat.ui.viewmodel.ZoneLocationUiState
 import com.example.solat.ui.viewmodel.ZoneLocationViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +55,12 @@ fun ZoneLocationScreen(
     modifier: Modifier = Modifier,
     viewModel: ZoneLocationViewModel = hiltViewModel()
 ) {
+    val currZoneId = viewModel.currentZoneId
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
+
+    val snackbarState = remember { SnackbarHostState() }
+
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         modifier = modifier,
@@ -64,7 +76,8 @@ fun ZoneLocationScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarState) }
     ) { innerPadding ->
         when (uiState) {
             is ZoneLocationUiState.Loading -> {
@@ -116,12 +129,22 @@ fun ZoneLocationScreen(
                                     modifier = Modifier.clickable(
                                         enabled = true,
                                         role = Role.DropdownList,
-                                        onClick = { /* TODO: Select zone location */ }
+                                        onClick = {
+                                            coroutineScope.launch(context = Dispatchers.IO) {
+                                                val result = viewModel.selectZone(zone)
+
+                                                snackbarState.showSnackbar(
+                                                    message = result.message,
+                                                    withDismissAction = true,
+                                                    duration = SnackbarDuration.Short
+                                                )
+                                            }
+                                        }
                                     ),
                                     supportingContent = { Text(text = zone.district) },
                                     trailingContent = {
                                         RadioButton(
-                                            selected = false,
+                                            selected = zone.zoneId == currZoneId,
                                             onClick = null
                                         )
                                     },
