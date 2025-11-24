@@ -36,7 +36,7 @@ class DataStoreManager @Inject constructor(context: Context) : PreferenceStorage
                 throw e
             }
         }.map { preferences ->
-            preferences[PreferencesKeys.ZONE] ?: 1
+            preferences[PreferencesKeys.ZONE] ?: 0
         }
     }
 
