@@ -3,6 +3,7 @@ package com.example.solat.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.solat.data.local.entity.Zone
+import com.example.solat.data.preference.datastore.PreferenceStorage
 import com.example.solat.data.repository.SolatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ZoneLocationViewModel @Inject constructor(
+    private val dataStore: PreferenceStorage,
     private val solatRepository: SolatRepository
 ) : ViewModel() {
     private val _uiState: MutableStateFlow<ZoneLocationUiState> =

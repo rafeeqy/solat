@@ -1,6 +1,7 @@
 package com.example.solat
 
 import com.example.solat.data.local.dao.SolatDao
+import com.example.solat.data.preference.datastore.PreferenceStorage
 import com.example.solat.data.remote.service.WaktuSolatApiService
 import com.example.solat.data.repository.OfflineSolatRepository
 import com.example.solat.data.repository.SolatRepository
@@ -23,6 +24,8 @@ object SolatApplicationModule {
         return OfflineSolatRepository(waktuSolatApiService, solatDao)
     }
 
-    fun provideZoneLocationViewModel(solatRepository: SolatRepository) =
-        ZoneLocationViewModel(solatRepository)
+    fun provideZoneLocationViewModel(
+        dataStore: PreferenceStorage,
+        solatRepository: SolatRepository
+    ) = ZoneLocationViewModel(dataStore, solatRepository)
 }
