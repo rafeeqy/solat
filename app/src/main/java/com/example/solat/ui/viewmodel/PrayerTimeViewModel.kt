@@ -69,6 +69,7 @@ class PrayerTimeViewModel @Inject constructor(
             ).split("-")
 
             solatRepository.fetchPrayerTimes(
+                zoneId = currentZone?.zoneId ?: 1,
                 year = currentDate[0].toInt(),
                 month = currentDate[1].toInt(),
                 day = currentDate[2].toInt()
@@ -76,12 +77,14 @@ class PrayerTimeViewModel @Inject constructor(
                 _uiState.value = PrayerTimeUiState.Error(
                     message = e.message ?: "Error: Failed to fetch prayer times"
                 )
-            }.collect { prayers ->
-                prayerTimes = parsePrayerTimes(prayers)
+            }.collect { prayer ->
+                if (prayer != null) {
+                    prayerTimes = parsePrayerTimes(prayer)
 
-                nextPrayer = parseNextPrayer()
+                    nextPrayer = parseNextPrayer()
 
-                _countdown.value = nextPrayer.time - System.currentTimeMillis()
+                    _countdown.value = nextPrayer.time - System.currentTimeMillis()
+                }
 
                 _uiState.value = PrayerTimeUiState.Success
             }

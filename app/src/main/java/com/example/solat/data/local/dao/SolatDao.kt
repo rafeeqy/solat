@@ -35,13 +35,16 @@ interface SolatDao {
         value = "SELECT pt.* " +
                 "FROM prayer_time pt " +
                 "LEFT JOIN prayer_details pd ON pd.prayer_details_id = pt.prayer_details_id " +
-                "WHERE pd.year = :year AND pd.month_number = :month AND pt.day IN (:day) AND pt.deleted_date IS NULL"
+                "WHERE pd.zone_id = :zoneId AND " +
+                "   pd.year = :year AND pd.month_number = :month AND pt.day IN (:day) AND " +
+                "   pt.deleted_date IS NULL"
     )
     fun loadPrayerTimes(
+        zoneId: Int,
         year: Int,
         month: Int,
         day: Int
-    ): Flow<PrayerTime>
+    ): Flow<PrayerTime?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertZones(zones: List<Zone>): List<Long>

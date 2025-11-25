@@ -71,9 +71,10 @@ class OfflineSolatRepository @Inject constructor(
      * Fetch `PrayerDetails` and 2 items of `PrayerTime` for today and tomorrow.
      */
     override fun fetchPrayerTimes(
+        zoneId: Int,
         year: Int,
         month: Int,
         day: Int
-    ): Flow<PrayerTime> =
-        solatDao.loadPrayerTimes(year, month, day)
+    ): Flow<PrayerTime?> =
+        solatDao.loadPrayerTimes(zoneId, year, month, day)
 }

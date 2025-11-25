@@ -9,6 +9,7 @@ import com.example.solat.data.local.entity.Zone
 import com.example.solat.data.preference.datastore.PreferenceStorage
 import com.example.solat.data.repository.SolatRepository
 import com.example.solat.util.CatchError
+import com.example.solat.util.SolatDateTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,6 +70,17 @@ class ZoneLocationViewModel @Inject constructor(
     suspend fun selectZone(zone: Zone): CatchError {
         return try {
             dataStore.setCurrentZoneId(zone.zoneId)
+
+            val currentDate = SolatDateTime.formatDate(
+                date = SolatDateTime.nowEpochMilli(),
+                format = "uuuu-MM-dd"
+            ).split("-")
+
+            solatRepository.remoteFetchPrayerTimes(
+                zone = zone,
+                year = currentDate[0].toInt(),
+                month = currentDate[1].toInt()
+            )
 
             CatchError(
                 isError = false,

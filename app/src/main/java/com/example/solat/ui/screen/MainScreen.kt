@@ -63,7 +63,9 @@ fun MainScreen(
     val countdown = viewModel.countdown.collectAsStateWithLifecycle().value
 
     LaunchedEffect(nextPrayer) {
-        viewModel.calculateTimeLeft()
+        if (prayerTime.isNotEmpty()) {
+            viewModel.calculateTimeLeft()
+        }
     }
 
     Scaffold(
@@ -374,7 +376,7 @@ private fun PrayerTimeCard(
                                 style = MaterialTheme.typography.labelLarge
                             )
                         }
-                        if(time == currentPrayer) {
+                        if (time == currentPrayer) {
                             Box(
                                 modifier = Modifier
                                     .width(32.dp)
@@ -384,7 +386,7 @@ private fun PrayerTimeCard(
                                         shape = RoundedCornerShape(50)
                                     )
                             )
-                        }else {
+                        } else {
                             Box(modifier = Modifier.height(6.dp))
                         }
                     }
