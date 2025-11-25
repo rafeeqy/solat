@@ -40,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.solat.ui.component.EmptyContent
 import com.example.solat.ui.component.ErrorContent
 import com.example.solat.ui.component.LoadingContent
 import com.example.solat.ui.theme.SolatTheme
@@ -95,7 +96,10 @@ fun ZoneLocationScreen(
                 val zones = uiState.zones
 
                 if (zones.isEmpty()) {
-                    EmptyContent(onRefresh = { viewModel.refresh() })
+                    EmptyContent(
+                        message = "No zone location to display.",
+                        onRefresh = { viewModel.refresh() }
+                    )
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
@@ -156,51 +160,5 @@ fun ZoneLocationScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun EmptyContent(
-    onRefresh: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Empty zone location...",
-                fontWeight = FontWeight.Light,
-                style = MaterialTheme.typography.titleLarge
-            )
-            Button(onClick = onRefresh) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Sync,
-                        contentDescription = "Sync",
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Text(text = "Refetch")
-                }
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ZoneLocationScreenPreview() {
-    SolatTheme {
-        ZoneLocationScreen(
-            onNavigateBack = {}
-        )
     }
 }

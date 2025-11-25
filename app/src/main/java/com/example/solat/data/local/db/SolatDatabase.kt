@@ -1,6 +1,7 @@
 package com.example.solat.data.local.db
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -15,9 +16,11 @@ import com.example.solat.data.local.entity.Zone
         PrayerDetails::class,
         PrayerTime::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
-    autoMigrations = []
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2)
+    ]
 )
 abstract class SolatDatabase : RoomDatabase() {
     abstract fun solatDao(): SolatDao

@@ -64,6 +64,9 @@ class OfflineSolatRepository @Inject constructor(
     override fun fetchAllZones(): Flow<List<Zone>> =
         solatDao.loadAllZones()
 
+    override fun fetchZoneById(zoneId: Int): Zone =
+        solatDao.loadZoneById(zoneId)
+
     /**
      * Fetch `PrayerDetails` and 2 items of `PrayerTime` for today and tomorrow.
      */
@@ -71,6 +74,6 @@ class OfflineSolatRepository @Inject constructor(
         year: Int,
         month: Int,
         day: Int
-    ): Flow<Map<PrayerDetails, List<PrayerTime>>> =
+    ): Flow<PrayerTime> =
         solatDao.loadPrayerTimes(year, month, day)
 }

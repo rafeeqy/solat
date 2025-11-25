@@ -8,7 +8,10 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "prayer_time",
-    indices = [Index(value = ["prayer_details_id"])],
+    indices = [
+        Index(value = ["prayer_details_id"]),
+        Index(value = ["prayer_details_id", "day"], unique = true)
+    ],
     foreignKeys = [
         ForeignKey(
             entity = PrayerDetails::class,

@@ -19,22 +19,29 @@ interface SolatDao {
     )
     fun loadAllZones(): Flow<List<Zone>>
 
+    @Query(
+        value = "SELECT * " +
+                "FROM zone " +
+                "WHERE zone_id = :zoneId AND deleted_date IS NULL"
+    )
+    fun loadZoneById(zoneId: Int): Zone
+
     /**
      * A Dao method to fetch prayer times with details.
      *
      * @return a map that contains `PrayerDetails` and 2 items of `PrayerTime` for today and tomorrow.
      */
     @Query(
-        value = "SELECT * " +
+        value = "SELECT pt.* " +
                 "FROM prayer_time pt " +
-                "LEFT JOIN prayer_details pd ON pd.prayer_details_id = pt.prayer_time_id " +
-                "WHERE pd.year = :year AND pd.month_number = :month AND pt.day IN (:day, :day + 1) AND pt.deleted_date IS NULL"
+                "LEFT JOIN prayer_details pd ON pd.prayer_details_id = pt.prayer_details_id " +
+                "WHERE pd.year = :year AND pd.month_number = :month AND pt.day IN (:day) AND pt.deleted_date IS NULL"
     )
     fun loadPrayerTimes(
         year: Int,
         month: Int,
         day: Int
-    ): Flow<Map<PrayerDetails, List<PrayerTime>>>
+    ): Flow<PrayerTime>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertZones(zones: List<Zone>): List<Long>
