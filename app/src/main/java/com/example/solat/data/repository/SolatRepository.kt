@@ -19,8 +19,9 @@ interface SolatRepository {
     fun fetchZoneById(zoneId: Int): Zone
 
     fun fetchPrayerTimes(
+        zoneId: Int,
         year: Int,
         month: Int,
         day: Int,
-    ): Flow<PrayerTime>
+    ): Flow<PrayerTime?>
 }
