@@ -13,6 +13,7 @@ import com.example.solat.data.repository.SolatRepository
 import com.example.solat.util.SolatDateTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,9 +30,16 @@ class PrayerTimeViewModel @Inject constructor(
 
     var prayerDate: Long by mutableLongStateOf(SolatDateTime.nowEpochMilli())
 
+    var prayerTimes: List<PrayerDateTime> by mutableStateOf(emptyList())
+
+    var nextPrayer: PrayerDateTime by mutableStateOf(PrayerDateTime())
+
     private val _uiState: MutableStateFlow<PrayerTimeUiState> =
         MutableStateFlow(PrayerTimeUiState.Loading)
     val uiState: StateFlow<PrayerTimeUiState> = _uiState.asStateFlow()
+
+    private val _countdown: MutableStateFlow<Long> = MutableStateFlow(0L)
+    val countdown: StateFlow<Long> = _countdown.asStateFlow()
 
     init {
         viewModelScope.launch(context = Dispatchers.IO) {
@@ -68,8 +76,14 @@ class PrayerTimeViewModel @Inject constructor(
                 _uiState.value = PrayerTimeUiState.Error(
                     message = e.message ?: "Error: Failed to fetch prayer times"
                 )
-            }.collect { prayerTime ->
-                _uiState.value = PrayerTimeUiState.Success(parsePrayerTimes(prayerTime))
+            }.collect { prayers ->
+                prayerTimes = parsePrayerTimes(prayers)
+
+                nextPrayer = parseNextPrayer()
+
+                _countdown.value = nextPrayer.time - System.currentTimeMillis()
+
+                _uiState.value = PrayerTimeUiState.Success
             }
         }
     }
@@ -109,6 +123,23 @@ class PrayerTimeViewModel @Inject constructor(
         )
     }
 
+    private fun parseNextPrayer(): PrayerDateTime {
+        val currentDate = SolatDateTime.nowEpochMilli()
+
+        return prayerTimes.find { prayer -> prayer.time > currentDate }!! // IMPORTANT: Refactor this code later
+    }
+
+    fun calculateTimeLeft() {
+        viewModelScope.launch {
+            while (_countdown.value > 0) {
+                delay(1000)
+                _countdown.value = nextPrayer.time - System.currentTimeMillis()
+            }
+            nextPrayer = parseNextPrayer()
+            _countdown.value = nextPrayer.time - System.currentTimeMillis()
+        }
+    }
+
     fun refetchPrayerTime() {
         viewModelScope.launch(context = Dispatchers.IO) {
             _uiState.value = PrayerTimeUiState.Loading
@@ -136,14 +167,12 @@ sealed interface PrayerTimeUiState {
         val message: String
     ) : PrayerTimeUiState
 
-    data class Success(
-        val prayerTime: List<PrayerDateTime> = emptyList()
-    ) : PrayerTimeUiState
+    data object Success : PrayerTimeUiState
 }
 
 data class PrayerDateTime(
-    val day: Int,
-    val hijri: String,
-    val prayer: String,
-    val time: Long
+    val day: Int = 0,
+    val hijri: String = "",
+    val prayer: String = "",
+    val time: Long = 0L
 )

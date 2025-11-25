@@ -29,21 +29,19 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.solat.data.local.entity.Zone
 import com.example.solat.ui.component.EmptyContent
 import com.example.solat.ui.component.ErrorContent
 import com.example.solat.ui.component.LoadingContent
-import com.example.solat.ui.theme.SolatTheme
 import com.example.solat.ui.viewmodel.PrayerDateTime
 import com.example.solat.ui.viewmodel.PrayerTimeUiState
 import com.example.solat.ui.viewmodel.PrayerTimeViewModel
@@ -59,7 +57,14 @@ fun MainScreen(
 ) {
     val currZone = viewModel.currentZone
     val prayerDate = viewModel.prayerDate
+    val prayerTime = viewModel.prayerTimes
+    val nextPrayer = viewModel.nextPrayer
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
+    val countdown = viewModel.countdown.collectAsStateWithLifecycle().value
+
+    LaunchedEffect(nextPrayer) {
+        viewModel.calculateTimeLeft()
+    }
 
     Scaffold(
         modifier = modifier,
@@ -89,8 +94,6 @@ fun MainScreen(
             }
 
             is PrayerTimeUiState.Success -> {
-                val prayerTime = uiState.prayerTime
-
                 if (prayerTime.isEmpty()) {
                     EmptyContent(
                         message = "No prayer time to display.",
@@ -128,14 +131,14 @@ fun MainScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    NextPrayer()
+                                    NextPrayer(prayer = nextPrayer)
                                 }
                                 // Prayer countdown
                                 Column(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    NextPrayerCountdown()
+                                    NextPrayerCountdown(timeLeft = countdown)
                                 }
                             }
                             // Bottom content
@@ -143,6 +146,7 @@ fun MainScreen(
                                 PrayerTimeCard(
                                     date = prayerDate,
                                     times = prayerTime,
+                                    currentPrayer = nextPrayer.time,
                                     modifier = Modifier.padding(
                                         horizontal = 16.dp,
                                         vertical = 56.dp
@@ -233,6 +237,7 @@ private fun ZoneLocationButton(
 
 @Composable
 private fun NextPrayer(
+    prayer: PrayerDateTime,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -240,12 +245,15 @@ private fun NextPrayer(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Asar",
+            text = prayer.prayer,
             fontSize = 80.sp,
             fontWeight = FontWeight.Light,
         )
         Text(
-            text = "4:28 pm",
+            text = SolatDateTime.formatDate(
+                date = prayer.time,
+                format = "h:mm a"
+            ).lowercase(),
             fontSize = 32.sp,
             fontWeight = FontWeight.ExtraLight,
         )
@@ -254,12 +262,13 @@ private fun NextPrayer(
 
 @Composable
 private fun NextPrayerCountdown(
+    timeLeft: Long,
     modifier: Modifier = Modifier
 ) {
     val tempData = mapOf(
-        "Hours" to "60",
-        "Minutes" to "60",
-        "Seconds" to "60"
+        "Hours" to (timeLeft / (1000 * 60 * 60)).toInt().toString(),
+        "Minutes" to (timeLeft / (1000 * 60) % 60).toInt().toString(),
+        "Seconds" to (timeLeft / 1000 % 60).toInt().toString()
     )
 
     Row(
@@ -279,7 +288,7 @@ private fun NextPrayerCountdown(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = entry.value,
+                        text = entry.value.padStart(2, '0'),
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.displaySmall
                     )
@@ -306,6 +315,7 @@ private fun NextPrayerCountdown(
 private fun PrayerTimeCard(
     date: Long,
     times: List<PrayerDateTime>,
+    currentPrayer: Long,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -364,15 +374,19 @@ private fun PrayerTimeCard(
                                 style = MaterialTheme.typography.labelLarge
                             )
                         }
-                        Box(
-                            modifier = Modifier
-                                .width(32.dp)
-                                .height(6.dp)
-                                .background(
-                                    color = MaterialTheme.colorScheme.primary,
-                                    shape = RoundedCornerShape(50)
-                                )
-                        )
+                        if(time == currentPrayer) {
+                            Box(
+                                modifier = Modifier
+                                    .width(32.dp)
+                                    .height(6.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.primary,
+                                        shape = RoundedCornerShape(50)
+                                    )
+                            )
+                        }else {
+                            Box(modifier = Modifier.height(6.dp))
+                        }
                     }
                 }
             }
