@@ -8,7 +8,10 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "prayer_details",
-    indices = [Index(value = ["zone_id"])],
+    indices = [
+        Index(value = ["zone_id"]),
+        Index(value = ["zone_id", "year", "month"], unique = true)
+    ],
     foreignKeys = [
         ForeignKey(
             entity = Zone::class,

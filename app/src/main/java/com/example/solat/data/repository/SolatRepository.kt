@@ -16,9 +16,11 @@ interface SolatRepository {
 
     fun fetchAllZones(): Flow<List<Zone>>
 
+    fun fetchZoneById(zoneId: Int): Zone
+
     fun fetchPrayerTimes(
         year: Int,
         month: Int,
-        day: Int
-    ): Flow<Map<PrayerDetails, List<PrayerTime>>>
+        day: Int,
+    ): Flow<PrayerTime>
 }

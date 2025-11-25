@@ -10,7 +10,7 @@ interface WaktuSolatApiService {
     @GET(value = "zones")
     suspend fun getAllZones(): List<ZoneApiModel>
 
-    @GET(value = "v2/solat/{zone}?year={year}&month={month}")
+    @GET(value = "v2/solat/{zone}")
     suspend fun getPrayerTimes(
         @Path(value = "zone") zone: String,
         @Query(value = "year") year: Int,
