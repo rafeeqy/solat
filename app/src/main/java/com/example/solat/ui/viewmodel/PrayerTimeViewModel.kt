@@ -26,11 +26,15 @@ class PrayerTimeViewModel @Inject constructor(
     private val dataStore: PreferenceStorage,
     private val solatRepository: SolatRepository
 ) : ViewModel() {
-    var currentZone: Zone? by mutableStateOf(null)
-
     var prayerDate: Long by mutableLongStateOf(SolatDateTime.nowEpochMilli())
 
-    var prayerTimes: List<PrayerDateTime> by mutableStateOf(emptyList())
+    private val _currentZone: MutableStateFlow<Zone?> =
+        MutableStateFlow(null)
+    val currentZone: StateFlow<Zone?> = _currentZone.asStateFlow()
+
+    private val _prayerTimes: MutableStateFlow<List<PrayerDateTime>> =
+        MutableStateFlow(emptyList())
+    val prayerTimes: StateFlow<List<PrayerDateTime>> = _prayerTimes.asStateFlow()
 
     var nextPrayer: PrayerDateTime by mutableStateOf(PrayerDateTime())
 
@@ -42,52 +46,55 @@ class PrayerTimeViewModel @Inject constructor(
     val countdown: StateFlow<Long> = _countdown.asStateFlow()
 
     init {
+        refresh()
+    }
+
+    fun refresh() {
         viewModelScope.launch(context = Dispatchers.IO) {
             _uiState.value = PrayerTimeUiState.Loading
 
             fetchZone()
-            fetchPrayerTimes()
         }
     }
 
-    fun fetchZone() {
+    private fun fetchZone() {
         viewModelScope.launch(context = Dispatchers.IO) {
             dataStore.getCurrentZoneId()
                 .collect { zoneId ->
                     if (zoneId > 0) {
-                        currentZone = solatRepository.fetchZoneById(zoneId)
+                        fetchPrayerTimes(zoneId)
                     }
                 }
         }
     }
 
-    fun fetchPrayerTimes() {
-        viewModelScope.launch(context = Dispatchers.IO) {
-            val currentDate = SolatDateTime.formatDate(
-                date = prayerDate,
-                format = "uuuu-MM-dd"
-            ).split("-")
+    private suspend fun fetchPrayerTimes(zoneId: Int) {
+        val currentDate = SolatDateTime.formatDate(
+            date = prayerDate,
+            format = "uuuu-MM-dd"
+        ).split("-")
 
-            solatRepository.fetchPrayerTimes(
-                zoneId = currentZone?.zoneId ?: 1,
-                year = currentDate[0].toInt(),
-                month = currentDate[1].toInt(),
-                day = currentDate[2].toInt()
-            ).catch { e ->
-                _uiState.value = PrayerTimeUiState.Error(
-                    message = e.message ?: "Error: Failed to fetch prayer times"
-                )
-            }.collect { prayer ->
-                if (prayer != null) {
-                    prayerTimes = parsePrayerTimes(prayer)
+        solatRepository.fetchPrayerTimes(
+            zoneId = zoneId,
+            year = currentDate[0].toInt(),
+            month = currentDate[1].toInt(),
+            day = currentDate[2].toInt()
+        ).catch { e ->
+            _uiState.value = PrayerTimeUiState.Error(
+                message = e.message ?: "Error: Failed to fetch prayer times"
+            )
+        }.collect { todayPrayer ->
+            if (todayPrayer != null) {
+                _currentZone.value = todayPrayer.prayerDetails.zone
 
-                    nextPrayer = parseNextPrayer()
+                _prayerTimes.value = parsePrayerTimes(todayPrayer.time)
 
-                    _countdown.value = nextPrayer.time - System.currentTimeMillis()
-                }
+                nextPrayer = parseNextPrayer()
 
-                _uiState.value = PrayerTimeUiState.Success
+                _countdown.value = nextPrayer.time - System.currentTimeMillis()
             }
+
+            _uiState.value = PrayerTimeUiState.Success
         }
     }
 
@@ -127,9 +134,7 @@ class PrayerTimeViewModel @Inject constructor(
     }
 
     private fun parseNextPrayer(): PrayerDateTime {
-        val currentDate = SolatDateTime.nowEpochMilli()
-
-        return prayerTimes.find { prayer -> prayer.time > currentDate }!! // IMPORTANT: Refactor this code later
+        return _prayerTimes.value.find { prayer -> prayer.time > prayerDate }!! // IMPORTANT: Refactor this code later
     }
 
     fun calculateTimeLeft() {
@@ -140,25 +145,6 @@ class PrayerTimeViewModel @Inject constructor(
             }
             nextPrayer = parseNextPrayer()
             _countdown.value = nextPrayer.time - System.currentTimeMillis()
-        }
-    }
-
-    fun refetchPrayerTime() {
-        viewModelScope.launch(context = Dispatchers.IO) {
-            _uiState.value = PrayerTimeUiState.Loading
-
-            val currentDate = SolatDateTime.formatDate(
-                date = prayerDate,
-                format = "uuuu-MM-dd"
-            ).split("-")
-
-            currentZone?.let { zone ->
-                solatRepository.remoteFetchPrayerTimes(
-                    zone = zone,
-                    year = currentDate[0].toInt(),
-                    month = currentDate[1].toInt()
-                )
-            }
         }
     }
 }

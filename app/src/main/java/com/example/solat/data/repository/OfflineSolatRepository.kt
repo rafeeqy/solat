@@ -4,6 +4,7 @@ import com.example.solat.data.local.dao.SolatDao
 import com.example.solat.data.local.entity.PrayerDetails
 import com.example.solat.data.local.entity.PrayerTime
 import com.example.solat.data.local.entity.Zone
+import com.example.solat.data.local.entity.relationship.TodayPrayerTime
 import com.example.solat.data.remote.service.WaktuSolatApiService
 import com.example.solat.util.SolatDateTime
 import kotlinx.coroutines.flow.Flow
@@ -64,7 +65,7 @@ class OfflineSolatRepository @Inject constructor(
     override fun fetchAllZones(): Flow<List<Zone>> =
         solatDao.loadAllZones()
 
-    override fun fetchZoneById(zoneId: Int): Zone =
+    override fun fetchZoneById(zoneId: Int): Flow<Zone> =
         solatDao.loadZoneById(zoneId)
 
     /**
@@ -75,6 +76,6 @@ class OfflineSolatRepository @Inject constructor(
         year: Int,
         month: Int,
         day: Int
-    ): Flow<PrayerTime?> =
+    ): Flow<TodayPrayerTime?> =
         solatDao.loadPrayerTimes(zoneId, year, month, day)
 }
