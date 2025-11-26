@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -55,9 +56,9 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     viewModel: PrayerTimeViewModel = hiltViewModel()
 ) {
-    val currZone = viewModel.currentZone
     val prayerDate = viewModel.prayerDate
-    val prayerTime = viewModel.prayerTimes
+    val currZone = viewModel.currentZone.collectAsStateWithLifecycle().value
+    val prayerTime = viewModel.prayerTimes.collectAsStateWithLifecycle().value
     val nextPrayer = viewModel.nextPrayer
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
     val countdown = viewModel.countdown.collectAsStateWithLifecycle().value
@@ -74,6 +75,12 @@ fun MainScreen(
             TopAppBar(
                 title = { /* NOTE: Leave this empty... */ },
                 actions = {
+                    IconButton(onClick = { viewModel.refresh() }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Refresh,
+                            contentDescription = "Refresh"
+                        )
+                    }
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Rounded.Settings,
@@ -99,7 +106,7 @@ fun MainScreen(
                 if (prayerTime.isEmpty()) {
                     EmptyContent(
                         message = "No prayer time to display.",
-                        onRefresh = { viewModel.refetchPrayerTime() }
+                        onRefresh = { viewModel.refresh() }
                     )
                 } else {
                     Box(modifier = Modifier.fillMaxSize()) {

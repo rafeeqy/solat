@@ -8,6 +8,7 @@ import androidx.room.Transaction
 import com.example.solat.data.local.entity.PrayerDetails
 import com.example.solat.data.local.entity.PrayerTime
 import com.example.solat.data.local.entity.Zone
+import com.example.solat.data.local.entity.relationship.TodayPrayerTime
 import kotlinx.coroutines.flow.Flow
 import java.lang.Exception
 
@@ -24,7 +25,7 @@ interface SolatDao {
                 "FROM zone " +
                 "WHERE zone_id = :zoneId AND deleted_date IS NULL"
     )
-    fun loadZoneById(zoneId: Int): Zone
+    fun loadZoneById(zoneId: Int): Flow<Zone>
 
     /**
      * A Dao method to fetch prayer times with details.
@@ -32,21 +33,22 @@ interface SolatDao {
      * @return a map that contains `PrayerDetails` and 2 items of `PrayerTime` for today and tomorrow.
      */
     @Query(
-        value = "SELECT pt.* " +
-                "FROM prayer_time pt " +
-                "LEFT JOIN prayer_details pd ON pd.prayer_details_id = pt.prayer_details_id " +
+        value = "SELECT * " +
+                "FROM prayer_details pd " +
+                "LEFT JOIN zone z ON z.zone_id = pd.zone_id " +
+                "LEFT JOIN prayer_time pt ON pt.prayer_details_id = pd.prayer_details_id " +
                 "WHERE pd.zone_id = :zoneId AND " +
-                "   pd.year = :year AND pd.month_number = :month AND pt.day IN (:day) AND " +
-                "   pt.deleted_date IS NULL"
+                "   pd.year = :year AND pd.month_number = :month AND pt.day = :day AND " +
+                "   pd.deleted_date IS NULL"
     )
     fun loadPrayerTimes(
         zoneId: Int,
         year: Int,
         month: Int,
         day: Int
-    ): Flow<PrayerTime?>
+    ): Flow<TodayPrayerTime?>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertZones(zones: List<Zone>): List<Long>
 
     /**
@@ -71,9 +73,9 @@ interface SolatDao {
         }
     }
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPrayerDetails(prayerDetails: PrayerDetails): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPrayerTimes(prayerTimes: List<PrayerTime>): List<Long>
 }
