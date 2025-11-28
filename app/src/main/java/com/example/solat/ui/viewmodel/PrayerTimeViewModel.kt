@@ -53,27 +53,24 @@ class PrayerTimeViewModel @Inject constructor(
         viewModelScope.launch(context = Dispatchers.IO) {
             _uiState.value = PrayerTimeUiState.Loading
 
-            fetchZone()
-        }
-    }
+            val currentDate = SolatDateTime.formatDate(
+                date = prayerDate,
+                format = "uuuu-MM-dd"
+            ).split("-")
 
-    private fun fetchZone() {
-        viewModelScope.launch(context = Dispatchers.IO) {
             dataStore.getCurrentZoneId()
                 .collect { zoneId ->
                     if (zoneId > 0) {
-                        fetchPrayerTimes(zoneId)
+                        fetchPrayerTimes(zoneId, currentDate)
                     }
                 }
         }
     }
 
-    private suspend fun fetchPrayerTimes(zoneId: Int) {
-        val currentDate = SolatDateTime.formatDate(
-            date = prayerDate,
-            format = "uuuu-MM-dd"
-        ).split("-")
-
+    private suspend fun fetchPrayerTimes(
+        zoneId: Int,
+        currentDate: List<String>
+    ) {
         solatRepository.fetchPrayerTimes(
             zoneId = zoneId,
             year = currentDate[0].toInt(),
@@ -98,43 +95,43 @@ class PrayerTimeViewModel @Inject constructor(
         }
     }
 
-    private fun parsePrayerTimes(prayerTime: PrayerTime): List<PrayerDateTime> {
+    private fun parsePrayerTimes(prayer: PrayerTime): List<PrayerDateTime> {
         return listOf(
             PrayerDateTime(
-                day = prayerTime.day,
-                hijri = prayerTime.hijri,
+                day = prayer.day,
+                hijri = prayer.hijri,
                 prayer = "Subuh",
-                time = (prayerTime.fajr.toString() + "000").toLong()
+                time = (prayer.fajr.toString() + "000").toLong()
             ),
             PrayerDateTime(
-                day = prayerTime.day,
-                hijri = prayerTime.hijri,
+                day = prayer.day,
+                hijri = prayer.hijri,
                 prayer = "Zohor",
-                time = (prayerTime.dhuhr.toString() + "000").toLong()
+                time = (prayer.dhuhr.toString() + "000").toLong()
             ),
             PrayerDateTime(
-                day = prayerTime.day,
-                hijri = prayerTime.hijri,
+                day = prayer.day,
+                hijri = prayer.hijri,
                 prayer = "Asar",
-                time = (prayerTime.asr.toString() + "000").toLong()
+                time = (prayer.asr.toString() + "000").toLong()
             ),
             PrayerDateTime(
-                day = prayerTime.day,
-                hijri = prayerTime.hijri,
+                day = prayer.day,
+                hijri = prayer.hijri,
                 prayer = "Maghrib",
-                time = (prayerTime.maghrib.toString() + "000").toLong()
+                time = (prayer.maghrib.toString() + "000").toLong()
             ),
             PrayerDateTime(
-                day = prayerTime.day,
-                hijri = prayerTime.hijri,
+                day = prayer.day,
+                hijri = prayer.hijri,
                 prayer = "Isyak",
-                time = (prayerTime.isha.toString() + "000").toLong()
-            ),
+                time = (prayer.isha.toString() + "000").toLong()
+            )
         )
     }
 
     private fun parseNextPrayer(): PrayerDateTime {
-        return _prayerTimes.value.find { prayer -> prayer.time > prayerDate }!! // IMPORTANT: Refactor this code later
+        return _prayerTimes.value.find { prayer -> prayer.time > SolatDateTime.nowEpochMilli() }!!
     }
 
     fun calculateTimeLeft() {
@@ -143,8 +140,14 @@ class PrayerTimeViewModel @Inject constructor(
                 delay(1000)
                 _countdown.value = nextPrayer.time - System.currentTimeMillis()
             }
-            nextPrayer = parseNextPrayer()
-            _countdown.value = nextPrayer.time - System.currentTimeMillis()
+
+            if (nextPrayer.prayer == "Isyak") {
+                prayerDate = SolatDateTime.tomorrowEpochMilli()
+                refresh()
+            } else {
+                nextPrayer = parseNextPrayer()
+                _countdown.value = nextPrayer.time - System.currentTimeMillis()
+            }
         }
     }
 }
