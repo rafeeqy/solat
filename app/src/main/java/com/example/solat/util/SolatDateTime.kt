@@ -1,5 +1,6 @@
 package com.example.solat.util
 
+import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.chrono.HijrahChronology
@@ -9,6 +10,10 @@ import java.time.format.DateTimeFormatter
 object SolatDateTime {
     fun nowEpochMilli(): Long {
         return Instant.now().toEpochMilli()
+    }
+
+    fun tomorrowEpochMilli(): Long {
+        return Instant.now().plus(Duration.ofDays(1)).toEpochMilli()
     }
 
     fun formatDate(

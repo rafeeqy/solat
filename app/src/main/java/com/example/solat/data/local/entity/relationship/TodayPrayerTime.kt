@@ -4,6 +4,7 @@ import androidx.room.Embedded
 import androidx.room.Relation
 import com.example.solat.data.local.entity.PrayerDetails
 import com.example.solat.data.local.entity.PrayerTime
+import com.example.solat.data.local.entity.Zone
 
 data class TodayPrayerTime(
     @Embedded
