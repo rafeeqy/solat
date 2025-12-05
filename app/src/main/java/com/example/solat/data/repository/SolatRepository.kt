@@ -2,6 +2,7 @@ package com.example.solat.data.repository
 
 import com.example.solat.data.local.entity.Zone
 import com.example.solat.data.local.entity.relationship.TodayPrayerTime
+import com.example.solat.ui.viewmodel.PrayerDateTime
 import kotlinx.coroutines.flow.Flow
 
 interface SolatRepository {
@@ -23,4 +24,6 @@ interface SolatRepository {
         month: Int,
         day: Int,
     ): Flow<TodayPrayerTime?>
+
+    fun nextPrayerCountdown(nextPrayer: PrayerDateTime)
 }

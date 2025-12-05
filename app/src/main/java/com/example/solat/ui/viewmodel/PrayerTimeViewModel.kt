@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.solat.alarm.AlarmSchedulerRepository
 import com.example.solat.data.local.entity.PrayerTime
 import com.example.solat.data.local.entity.Zone
 import com.example.solat.data.preference.datastore.PreferenceStorage
@@ -24,7 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class PrayerTimeViewModel @Inject constructor(
     private val dataStore: PreferenceStorage,
-    private val solatRepository: SolatRepository
+    private val solatRepository: SolatRepository,
+    private val alarmSchedulerRepository: AlarmSchedulerRepository
 ) : ViewModel() {
     var prayerDate: Long by mutableLongStateOf(SolatDateTime.nowEpochMilli())
 
@@ -53,6 +55,11 @@ class PrayerTimeViewModel @Inject constructor(
         viewModelScope.launch(context = Dispatchers.IO) {
             _uiState.value = PrayerTimeUiState.Loading
 
+            /**
+             * IMPORTANT: When opening the app, if it's past Isyak prayer times, the app will break.
+             * IMPORTANT: It break because the `currentDate` is today, so it will fetch today prayer times.
+             * IMPORTANT: Because of this, the `prayerDate` is more than prayer time. The `parseNextPrayer` function will return null exception.
+             */
             val currentDate = SolatDateTime.formatDate(
                 date = prayerDate,
                 format = "uuuu-MM-dd"
@@ -87,6 +94,10 @@ class PrayerTimeViewModel @Inject constructor(
                 _prayerTimes.value = parsePrayerTimes(todayPrayer.time)
 
                 nextPrayer = parseNextPrayer()
+
+                alarmSchedulerRepository.schedule(nextPrayer)
+
+                solatRepository.nextPrayerCountdown(nextPrayer)
 
                 _countdown.value = nextPrayer.time - System.currentTimeMillis()
             }

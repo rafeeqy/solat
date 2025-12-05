@@ -1,18 +1,25 @@
 package com.example.solat.data.repository
 
+import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.solat.data.local.dao.SolatDao
 import com.example.solat.data.local.entity.PrayerDetails
 import com.example.solat.data.local.entity.PrayerTime
 import com.example.solat.data.local.entity.Zone
 import com.example.solat.data.local.entity.relationship.TodayPrayerTime
 import com.example.solat.data.remote.service.WaktuSolatApiService
+import com.example.solat.ui.viewmodel.PrayerDateTime
 import com.example.solat.util.SolatDateTime
+import com.example.solat.workers.CountdownWorker
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class OfflineSolatRepository @Inject constructor(
     private val waktuSolatApiService: WaktuSolatApiService,
-    private val solatDao: SolatDao
+    private val solatDao: SolatDao,
+    private val workManager: WorkManager
 ) : SolatRepository {
     override suspend fun remoteFetchAllZones(): List<Long> {
         val zones = waktuSolatApiService.getAllZones()
@@ -78,4 +85,20 @@ class OfflineSolatRepository @Inject constructor(
         day: Int
     ): Flow<TodayPrayerTime?> =
         solatDao.loadPrayerTimes(zoneId, year, month, day)
+
+    override fun nextPrayerCountdown(nextPrayer: PrayerDateTime) {
+        val data = Data.Builder()
+        data.putString("prayerName", nextPrayer.prayer)
+        data.putLong("prayerTime", nextPrayer.time)
+
+        val workRequestBuilder = OneTimeWorkRequestBuilder<CountdownWorker>()
+            .setInputData(data.build())
+            .build()
+
+        workManager.enqueueUniqueWork(
+            "prayer_countdown",
+            ExistingWorkPolicy.REPLACE,
+            workRequestBuilder
+        )
+    }
 }
