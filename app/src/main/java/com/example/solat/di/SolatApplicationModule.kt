@@ -7,6 +7,7 @@ import com.example.solat.data.preference.datastore.PreferenceStorage
 import com.example.solat.data.remote.service.WaktuSolatApiService
 import com.example.solat.data.repository.OfflineSolatRepository
 import com.example.solat.data.repository.SolatRepository
+import com.example.solat.ui.viewmodel.OnboardingViewModel
 import com.example.solat.ui.viewmodel.PrayerTimeViewModel
 import com.example.solat.ui.viewmodel.ZoneLocationViewModel
 import dagger.Module
@@ -27,6 +28,9 @@ object SolatApplicationModule {
     ): SolatRepository {
         return OfflineSolatRepository(waktuSolatApiService, solatDao, workManager)
     }
+
+    @Provides
+    fun provideOnboardingViewModel(dataStore: PreferenceStorage) = OnboardingViewModel(dataStore)
 
     @Provides
     fun provideZoneLocationViewModel(
