@@ -1,6 +1,7 @@
 package com.example.solat.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -18,8 +19,13 @@ fun SolatNavHost(
     modifier: Modifier = Modifier
 ) {
     val onboardingVM: OnboardingViewModel = hiltViewModel()
+    val zoneId = onboardingVM.currentZoneId.collectAsStateWithLifecycle().value
 
-    val isFirstTime: Boolean = onboardingVM.currentZoneId.collectAsStateWithLifecycle().value == 0
+    var isFirstTime = false
+
+    LaunchedEffect(Unit) {
+        isFirstTime = zoneId == 0
+    }
 
     NavHost(
         navController = navController,
