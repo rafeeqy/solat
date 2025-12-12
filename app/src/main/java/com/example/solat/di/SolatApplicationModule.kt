@@ -30,7 +30,10 @@ object SolatApplicationModule {
     }
 
     @Provides
-    fun provideOnboardingViewModel(dataStore: PreferenceStorage) = OnboardingViewModel(dataStore)
+    fun provideOnboardingViewModel(
+        dataStore: PreferenceStorage,
+        solatRepository: SolatRepository
+    ) = OnboardingViewModel(dataStore, solatRepository)
 
     @Provides
     fun provideZoneLocationViewModel(

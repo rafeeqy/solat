@@ -1,61 +1,47 @@
 package com.example.solat.ui.screen.onboarding
 
-import android.Manifest
-import android.app.AlarmManager
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
-import android.provider.Settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.solat.ui.screen.permission.PermissionHandler
 import com.example.solat.ui.theme.SolatTheme
+import com.example.solat.ui.viewmodel.OnboardingViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun WelcomeScreen(
     onNavigateToZoneLocation: () -> Unit,
     onNavigateToMain: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: OnboardingViewModel = hiltViewModel()
 ) {
+    val zoneId = viewModel.currentZoneId.collectAsStateWithLifecycle().value
+    val selectedZone = viewModel.selectedZone.collectAsStateWithLifecycle().value
+
     Scaffold(modifier = modifier) { innerPadding ->
 
         PermissionHandler()
@@ -106,24 +92,32 @@ fun WelcomeScreen(
                         ),
                         supportingContent = {
                             Text(
-                                text = "No zone selected",
+                                text = if (selectedZone != null) "Zone ${selectedZone.code}: ${selectedZone.state}" else "No zone selected",
                                 color = MaterialTheme.colorScheme.secondary,
                                 fontStyle = FontStyle.Italic
                             )
                         },
                         trailingContent = {
-                            Icon(
-                                imageVector = Icons.Rounded.Cancel,
-                                contentDescription = "Cancel",
-                                tint = MaterialTheme.colorScheme.error
-                            )
+                            if (zoneId > 0) {
+                                Icon(
+                                    imageVector = Icons.Rounded.CheckCircle,
+                                    contentDescription = "Check circle",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Rounded.Cancel,
+                                    contentDescription = "Cancel",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
                         }
                     )
                 }
                 Button(
                     onClick = onNavigateToMain,
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = false
+                    enabled = zoneId > 0
                 ) {
                     Text(
                         text = "Complete",
