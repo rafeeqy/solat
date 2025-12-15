@@ -1,7 +1,6 @@
 package com.example.solat.ui.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.LocationOn
@@ -45,7 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.solat.ui.component.EmptyContent
 import com.example.solat.ui.component.ErrorContent
 import com.example.solat.ui.component.LoadingContent
-import com.example.solat.ui.viewmodel.PrayerDateTime
+import com.example.solat.ui.viewmodel.Prayer
 import com.example.solat.ui.viewmodel.PrayerTimeUiState
 import com.example.solat.ui.viewmodel.PrayerTimeViewModel
 import com.example.solat.util.SolatDateTime
@@ -58,15 +56,15 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     viewModel: PrayerTimeViewModel = hiltViewModel()
 ) {
-    val prayerDate = viewModel.prayerDate
-    val currZone = viewModel.currentZone.collectAsStateWithLifecycle().value
-    val prayerTime = viewModel.prayerTimes.collectAsStateWithLifecycle().value
-    val nextPrayer = viewModel.nextPrayer
-    val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
+    val date = viewModel.date
+    val zone = viewModel.zone.collectAsStateWithLifecycle().value
+    val waktuSolat = viewModel.waktuSolat.collectAsStateWithLifecycle().value
+    val upcomingPrayer = viewModel.upcomingPrayer.collectAsStateWithLifecycle().value
     val countdown = viewModel.countdown.collectAsStateWithLifecycle().value
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
 
-    LaunchedEffect(nextPrayer) {
-        if (prayerTime.isNotEmpty()) {
+    LaunchedEffect(upcomingPrayer) {
+        if (waktuSolat != null) {
             viewModel.calculateTimeLeft()
         }
     }
@@ -105,7 +103,7 @@ fun MainScreen(
             }
 
             is PrayerTimeUiState.Success -> {
-                if (prayerTime.isEmpty()) {
+                if (waktuSolat == null) {
                     EmptyContent(
                         message = "No prayer time to display.",
                         onRefresh = { viewModel.refresh() }
@@ -129,10 +127,10 @@ fun MainScreen(
                                 ) {
                                     DateButton()
                                     ZoneLocationButton(
-                                        stateZone = currZone?.let {
+                                        stateZone = zone?.let {
                                             "${it.state} (${it.code})"
                                         } ?: "Unknown zone",
-                                        district = currZone?.district ?: "Unknown districts",
+                                        district = zone?.district ?: "Unknown districts",
                                         onClick = onNavigateToZoneLocation,
                                         modifier = Modifier.fillMaxWidth(3 / 4f)
                                     )
@@ -142,7 +140,7 @@ fun MainScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    NextPrayer(prayer = nextPrayer)
+                                    NextPrayer(prayer = upcomingPrayer)
                                 }
                                 // Prayer countdown
                                 Column(
@@ -155,9 +153,9 @@ fun MainScreen(
                             // Bottom content
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 PrayerTimeCard(
-                                    date = prayerDate,
-                                    times = prayerTime,
-                                    currentPrayer = nextPrayer.time,
+                                    date = date,
+                                    times = waktuSolat.prayers,
+                                    currentPrayer = upcomingPrayer?.time ?: 0L,
                                     modifier = Modifier.padding(
                                         horizontal = 16.dp,
                                         vertical = 56.dp
@@ -248,7 +246,7 @@ private fun ZoneLocationButton(
 
 @Composable
 private fun NextPrayer(
-    prayer: PrayerDateTime,
+    prayer: Prayer?,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -256,15 +254,19 @@ private fun NextPrayer(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = prayer.prayer,
+            text = prayer?.name ?: "Unknown",
             fontSize = 80.sp,
             fontWeight = FontWeight.Light,
         )
         Text(
-            text = SolatDateTime.formatDate(
-                date = prayer.time,
-                format = "h:mm a"
-            ).lowercase(),
+            text = if (prayer != null) {
+                SolatDateTime.formatDate(
+                    date = prayer.time,
+                    format = "h:mm a"
+                ).lowercase()
+            } else {
+                "Unknown"
+            },
             fontSize = 32.sp,
             fontWeight = FontWeight.ExtraLight,
         )
@@ -325,7 +327,7 @@ private fun NextPrayerCountdown(
 @Composable
 private fun PrayerTimeCard(
     date: Long,
-    times: List<PrayerDateTime>,
+    times: List<Prayer>,
     currentPrayer: Long,
     modifier: Modifier = Modifier
 ) {
@@ -362,7 +364,7 @@ private fun PrayerTimeCard(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                times.forEach { (_, _, prayer, time) ->
+                times.forEach { (name, time) ->
                     Column(
                         modifier = Modifier.padding(
                             vertical = 16.dp
@@ -372,7 +374,7 @@ private fun PrayerTimeCard(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = prayer,
+                                text = name,
                                 fontWeight = FontWeight.Normal,
                                 style = MaterialTheme.typography.labelLarge
                             )

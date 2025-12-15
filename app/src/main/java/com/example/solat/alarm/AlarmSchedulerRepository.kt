@@ -1,9 +1,9 @@
 package com.example.solat.alarm
 
-import com.example.solat.ui.viewmodel.PrayerDateTime
+import com.example.solat.ui.viewmodel.Prayer
 
 interface AlarmSchedulerRepository {
-    fun schedule(prayer: PrayerDateTime)
+    fun schedule(prayer: Prayer)
 
-    fun cancel(prayer: PrayerDateTime)
+    fun cancel(prayer: Prayer)
 }

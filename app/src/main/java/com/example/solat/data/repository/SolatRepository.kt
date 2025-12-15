@@ -1,8 +1,7 @@
 package com.example.solat.data.repository
 
 import com.example.solat.data.local.entity.Zone
-import com.example.solat.data.local.entity.relationship.TodayPrayerTime
-import com.example.solat.ui.viewmodel.PrayerDateTime
+import com.example.solat.data.local.entity.relationship.PrayerTimeAndDetails
 import kotlinx.coroutines.flow.Flow
 
 interface SolatRepository {
@@ -16,14 +15,12 @@ interface SolatRepository {
 
     fun fetchAllZones(): Flow<List<Zone>>
 
-    fun fetchZoneById(zoneId: Int): Flow<Zone>
+    fun fetchZoneById(zoneId: Int): Flow<Zone?>
 
-    fun fetchPrayerTimes(
+    fun fetchPrayer(
         zoneId: Int,
         year: Int,
         month: Int,
-        day: Int,
-    ): Flow<TodayPrayerTime?>
-
-    fun nextPrayerCountdown(nextPrayer: PrayerDateTime)
+        day: Int
+    ): Flow<PrayerTimeAndDetails?>
 }

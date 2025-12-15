@@ -8,9 +8,8 @@ import androidx.room.Transaction
 import com.example.solat.data.local.entity.PrayerDetails
 import com.example.solat.data.local.entity.PrayerTime
 import com.example.solat.data.local.entity.Zone
-import com.example.solat.data.local.entity.relationship.TodayPrayerTime
+import com.example.solat.data.local.entity.relationship.PrayerTimeAndDetails
 import kotlinx.coroutines.flow.Flow
-import java.lang.Exception
 
 @Dao
 interface SolatDao {
@@ -28,25 +27,23 @@ interface SolatDao {
     fun loadZoneById(zoneId: Int): Flow<Zone>
 
     /**
-     * A Dao method to fetch prayer times with details.
+     * A Dao's transaction method to fetch prayer details with times based on [zoneId], [year], and [month].
      *
-     * @return a map that contains `PrayerDetails` and 2 items of `PrayerTime` for today and tomorrow.
+     * @return a flow of [PrayerDetailsAndTime] object or `null`.
      */
+    @Transaction
     @Query(
         value = "SELECT * " +
-                "FROM prayer_details pd " +
-                "LEFT JOIN zone z ON z.zone_id = pd.zone_id " +
-                "LEFT JOIN prayer_time pt ON pt.prayer_details_id = pd.prayer_details_id " +
-                "WHERE pd.zone_id = :zoneId AND " +
-                "   pd.year = :year AND pd.month_number = :month AND pt.day = :day AND " +
-                "   pd.deleted_date IS NULL"
+                "FROM prayer_time pt " +
+                "INNER JOIN prayer_details pd ON pd.prayer_details_id = pt.prayer_details_id " +
+                "WHERE pd.zone_id = :zoneId AND pd.year = :year AND pd.month_number = :month AND pt.day = :day "
     )
-    fun loadPrayerTimes(
+    fun loadPrayer(
         zoneId: Int,
         year: Int,
         month: Int,
         day: Int
-    ): Flow<TodayPrayerTime?>
+    ): Flow<PrayerTimeAndDetails?>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertZones(zones: List<Zone>): List<Long>

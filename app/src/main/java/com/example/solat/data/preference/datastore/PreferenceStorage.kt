@@ -14,4 +14,8 @@ interface PreferenceStorage {
     fun getLocale(): Flow<String>
 
     suspend fun setLocale(locale: String)
+
+    fun getPreviousIsyakPrayer(): Flow<Long?>
+
+    suspend fun setPreviousIsyakPrayer(isyakPrayer: Long)
 }
