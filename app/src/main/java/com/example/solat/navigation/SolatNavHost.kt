@@ -23,7 +23,7 @@ fun SolatNavHost(
 
     var isFirstTime = false
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(zoneId) {
         isFirstTime = zoneId == 0
     }
 

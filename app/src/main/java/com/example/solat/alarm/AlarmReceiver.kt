@@ -7,11 +7,11 @@ import com.example.solat.util.makePrayerNotification
 
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        val prayerName = intent?.getStringExtra("PRAYER_NAME") ?: "Prayer"
+        val prayerName = intent?.getStringExtra("PRAYER_NAME") ?: "Solat"
 
         makePrayerNotification(
-            title = "Masuk Waktu Solat $prayerName",
-            message = "Sila tunaikan solat...",
+            title = "Peringatan $prayerName",
+            message = "Telah masuk waktu $prayerName. Sila tunaikan kewajipan solat anda.",
             context = context!!
         )
     }

@@ -1,19 +1,15 @@
 package com.example.solat.data.repository
 
-import androidx.work.Data
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.solat.data.local.dao.SolatDao
 import com.example.solat.data.local.entity.PrayerDetails
 import com.example.solat.data.local.entity.PrayerTime
 import com.example.solat.data.local.entity.Zone
-import com.example.solat.data.local.entity.relationship.TodayPrayerTime
+import com.example.solat.data.local.entity.relationship.PrayerTimeAndDetails
 import com.example.solat.data.remote.service.WaktuSolatApiService
-import com.example.solat.ui.viewmodel.PrayerDateTime
 import com.example.solat.util.SolatDateTime
-import com.example.solat.workers.CountdownWorker
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
 class OfflineSolatRepository @Inject constructor(
@@ -72,33 +68,20 @@ class OfflineSolatRepository @Inject constructor(
     override fun fetchAllZones(): Flow<List<Zone>> =
         solatDao.loadAllZones()
 
-    override fun fetchZoneById(zoneId: Int): Flow<Zone> =
-        solatDao.loadZoneById(zoneId)
+    override fun fetchZoneById(zoneId: Int): Flow<Zone?> {
+        return if (zoneId > 0) solatDao.loadZoneById(zoneId) else flowOf(null)
+    }
 
     /**
-     * Fetch `PrayerDetails` and 2 items of `PrayerTime` for today and tomorrow.
+     * A Dao's transaction method to fetch prayer details with times based on [zoneId], [year], and [month].
+     *
+     * @return a flow of [PrayerTimeAndDetails] object or `null`.
      */
-    override fun fetchPrayerTimes(
+    override fun fetchPrayer(
         zoneId: Int,
         year: Int,
         month: Int,
         day: Int
-    ): Flow<TodayPrayerTime?> =
-        solatDao.loadPrayerTimes(zoneId, year, month, day)
-
-    override fun nextPrayerCountdown(nextPrayer: PrayerDateTime) {
-        val data = Data.Builder()
-        data.putString("prayerName", nextPrayer.prayer)
-        data.putLong("prayerTime", nextPrayer.time)
-
-        val workRequestBuilder = OneTimeWorkRequestBuilder<CountdownWorker>()
-            .setInputData(data.build())
-            .build()
-
-        workManager.enqueueUniqueWork(
-            "prayer_countdown",
-            ExistingWorkPolicy.REPLACE,
-            workRequestBuilder
-        )
-    }
+    ): Flow<PrayerTimeAndDetails?> =
+        solatDao.loadPrayer(zoneId, year, month, day)
 }

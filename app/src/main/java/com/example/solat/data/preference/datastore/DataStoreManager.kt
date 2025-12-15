@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.solat.data.preference.data.Language
@@ -26,6 +27,7 @@ class DataStoreManager @Inject constructor(context: Context) : PreferenceStorage
         val ZONE = intPreferencesKey(name = "zone")
         val THEME = stringPreferencesKey(name = "theme")
         val LOCALE = stringPreferencesKey(name = "locale")
+        val ISYAK = longPreferencesKey(name = "isyak")
     }
 
     override fun getCurrentZoneId(): Flow<Int> {
@@ -79,6 +81,24 @@ class DataStoreManager @Inject constructor(context: Context) : PreferenceStorage
     override suspend fun setLocale(locale: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.LOCALE] = locale
+        }
+    }
+
+    override fun getPreviousIsyakPrayer(): Flow<Long?> {
+        return dataStore.data.catch { e ->
+            if (e is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw e
+            }
+        }.map { preferences ->
+            preferences[PreferencesKeys.ISYAK]
+        }
+    }
+
+    override suspend fun setPreviousIsyakPrayer(isyakPrayer: Long) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ISYAK] = isyakPrayer
         }
     }
 }

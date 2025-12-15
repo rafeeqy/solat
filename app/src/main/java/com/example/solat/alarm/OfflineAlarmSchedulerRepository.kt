@@ -5,7 +5,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import com.example.solat.ui.viewmodel.PrayerDateTime
+import com.example.solat.ui.viewmodel.Prayer
 import javax.inject.Inject
 
 class OfflineAlarmSchedulerRepository @Inject constructor(
@@ -15,18 +15,18 @@ class OfflineAlarmSchedulerRepository @Inject constructor(
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
     @SuppressLint("ScheduleExactAlarm")
-    override fun schedule(prayer: PrayerDateTime) {
+    override fun schedule(prayer: Prayer) {
         val intent = Intent(context, AlarmReceiver::class.java)
             .apply {
                 putExtra(
                     "PRAYER_NAME",
-                    prayer.prayer
+                    prayer.name
                 )
             }
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            prayer.prayer.hashCode(),
+            prayer.name.hashCode(),
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
@@ -38,12 +38,12 @@ class OfflineAlarmSchedulerRepository @Inject constructor(
         )
     }
 
-    override fun cancel(prayer: PrayerDateTime) {
+    override fun cancel(prayer: Prayer) {
         val intent = Intent(context, AlarmReceiver::class.java)
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            prayer.prayer.hashCode(),
+            prayer.name.hashCode(),
             intent,
             PendingIntent.FLAG_IMMUTABLE
         )
