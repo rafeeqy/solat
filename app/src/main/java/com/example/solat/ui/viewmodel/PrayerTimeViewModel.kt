@@ -1,9 +1,5 @@
 package com.example.solat.ui.viewmodel
 
-import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.solat.alarm.AlarmSchedulerRepository
@@ -11,7 +7,6 @@ import com.example.solat.data.local.entity.Zone
 import com.example.solat.data.local.entity.derived.DailyPrayerDetails
 import com.example.solat.data.preference.datastore.PreferenceStorage
 import com.example.solat.data.repository.SolatRepository
-import com.example.solat.util.SolatDateTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -28,10 +23,6 @@ class PrayerTimeViewModel @Inject constructor(
     private val solatRepository: SolatRepository,
     private val alarmSchedulerRepository: AlarmSchedulerRepository
 ) : ViewModel() {
-
-    var date: Long by mutableLongStateOf(SolatDateTime.nowEpochMilli())
-
-    private val _previousIsyak: MutableStateFlow<Long?> = MutableStateFlow(null)
 
     private val _zoneId: MutableStateFlow<Int> = MutableStateFlow(0)
 
