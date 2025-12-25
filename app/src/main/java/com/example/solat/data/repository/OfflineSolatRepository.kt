@@ -1,15 +1,21 @@
 package com.example.solat.data.repository
 
+import android.util.Log
 import androidx.work.WorkManager
 import com.example.solat.data.local.dao.SolatDao
 import com.example.solat.data.local.entity.PrayerDetails
 import com.example.solat.data.local.entity.PrayerTime
 import com.example.solat.data.local.entity.Zone
-import com.example.solat.data.local.entity.relationship.PrayerTimeAndDetails
+import com.example.solat.data.local.entity.derived.DailyPrayerDetails
 import com.example.solat.data.remote.service.WaktuSolatApiService
+import com.example.solat.util.NextDayStatus
 import com.example.solat.util.SolatDateTime
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 class OfflineSolatRepository @Inject constructor(
@@ -72,16 +78,31 @@ class OfflineSolatRepository @Inject constructor(
         return if (zoneId > 0) solatDao.loadZoneById(zoneId) else flowOf(null)
     }
 
-    /**
-     * A Dao's transaction method to fetch prayer details with times based on [zoneId], [year], and [month].
-     *
-     * @return a flow of [PrayerTimeAndDetails] object or `null`.
-     */
-    override fun fetchPrayer(
-        zoneId: Int,
-        year: Int,
-        month: Int,
-        day: Int
-    ): Flow<PrayerTimeAndDetails?> =
-        solatDao.loadPrayer(zoneId, year, month, day)
+    override fun fetchDailyPrayers(
+        zone: Zone
+    ): Flow<List<DailyPrayerDetails>> = flow {
+        val today = SolatDateTime.splitDate(SolatDateTime.nowEpochMilli())
+        val tomorrow = SolatDateTime.splitDate(SolatDateTime.tomorrowEpochMilli())
+        val tomorrowStatus = SolatDateTime.nextDayStatus()
+
+        if (
+            tomorrowStatus != NextDayStatus.NO_CHANGES &&
+            solatDao.hasPrayerOnYearAndMonth(tomorrow.year, tomorrow.month) == null
+        ) {
+            try {
+                remoteFetchPrayerTimes(zone, tomorrow.year, tomorrow.month)
+            } catch (e: Exception) {
+                Log.e("FETCHDAILYPRAYERS", "Error: ${e.message}")
+            }
+        }
+
+        emitAll(
+            solatDao.loadDailyPrayers(
+                zone.zoneId,
+                listOf(today.year, tomorrow.year),
+                listOf(today.month, tomorrow.month),
+                listOf(today.day, tomorrow.day)
+            )
+        )
+    }.flowOn(context = Dispatchers.IO)
 }
