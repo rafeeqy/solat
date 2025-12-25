@@ -99,9 +99,12 @@ class OfflineSolatRepository @Inject constructor(
         emitAll(
             solatDao.loadDailyPrayers(
                 zone.zoneId,
-                listOf(today.year, tomorrow.year),
-                listOf(today.month, tomorrow.month),
-                listOf(today.day, tomorrow.day)
+                todayYear = today.year,
+                tomorrowYear = tomorrow.year,
+                todayMonth = today.month,
+                tomorrowMonth = tomorrow.month,
+                today = today.day,
+                tomorrow = tomorrow.day,
             )
         )
     }.flowOn(context = Dispatchers.IO)
