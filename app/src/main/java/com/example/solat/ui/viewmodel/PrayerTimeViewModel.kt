@@ -1,5 +1,6 @@
 package com.example.solat.ui.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.setValue
@@ -7,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.solat.alarm.AlarmSchedulerRepository
 import com.example.solat.data.local.entity.Zone
-import com.example.solat.data.local.entity.relationship.PrayerTimeAndDetails
+import com.example.solat.data.local.entity.derived.DailyPrayerDetails
 import com.example.solat.data.preference.datastore.PreferenceStorage
 import com.example.solat.data.repository.SolatRepository
 import com.example.solat.util.SolatDateTime
@@ -37,11 +38,11 @@ class PrayerTimeViewModel @Inject constructor(
     private val _zone: MutableStateFlow<Zone?> = MutableStateFlow(null)
     var zone: StateFlow<Zone?> = _zone.asStateFlow()
 
-    private val _waktuSolat: MutableStateFlow<WaktuSolat?> = MutableStateFlow(null)
-    val waktuSolat: StateFlow<WaktuSolat?> = _waktuSolat.asStateFlow()
+    private val _waktuSolat: MutableStateFlow<List<WaktuSolat>> = MutableStateFlow(emptyList())
+    val waktuSolat: StateFlow<List<WaktuSolat>> = _waktuSolat.asStateFlow()
 
-    private val _upcomingPrayer: MutableStateFlow<Prayer?> = MutableStateFlow(null)
-    val upcomingPrayer: StateFlow<Prayer?> = _upcomingPrayer.asStateFlow()
+    private val _upcomingPrayer: MutableStateFlow<WaktuSolat?> = MutableStateFlow(null)
+    val upcomingPrayer: StateFlow<WaktuSolat?> = _upcomingPrayer.asStateFlow()
 
     private val _countdown: MutableStateFlow<Long> = MutableStateFlow(0L)
     val countdown: StateFlow<Long> = _countdown.asStateFlow()
@@ -54,19 +55,13 @@ class PrayerTimeViewModel @Inject constructor(
         viewModelScope.launch(context = Dispatchers.IO) {
             dataStore.getCurrentZoneId().collect { id ->
                 _zoneId.value = id
-                getZone()
 
-                dataStore.getPreviousIsyakPrayer().collect { isyak ->
-                    _previousIsyak.value = isyak
+                solatRepository.fetchZoneById(_zoneId.value).collect {
+                    _zone.value = it
+
                     refresh()
                 }
             }
-        }
-    }
-
-    private fun getZone() {
-        viewModelScope.launch(context = Dispatchers.IO) {
-            solatRepository.fetchZoneById(_zoneId.value).collect { _zone.value = it }
         }
     }
 
@@ -74,36 +69,24 @@ class PrayerTimeViewModel @Inject constructor(
         viewModelScope.launch(context = Dispatchers.IO) {
             _uiState.value = PrayerTimeUiState.Loading
 
-            date = if (_previousIsyak.value != null && date > _previousIsyak.value!!) {
-                SolatDateTime.tomorrowEpochMilli()
-            } else {
-                SolatDateTime.nowEpochMilli()
-            }
+            val currTimeMillis = System.currentTimeMillis()
 
-            val splitDate = SolatDateTime.formatDate(
-                date = date,
-                format = "uuuu-MM-dd"
-            ).split("-")
-
-            if (_zoneId.value > 0) {
-                solatRepository.fetchPrayer(
-                    zoneId = _zoneId.value,
-                    year = splitDate[0].toInt(),
-                    month = splitDate[1].toInt(),
-                    day = splitDate[2].toInt()
-                ).catch { e ->
+            if (_zoneId.value > 0 && _zone.value != null) {
+                solatRepository.fetchDailyPrayers(_zone.value!!).catch { e ->
                     _uiState.value = PrayerTimeUiState.Error(
                         message = e.message ?: "Error: Failed to fetch prayer times"
                     )
                 }.collect { dailyPrayer ->
-                    if (dailyPrayer != null) {
+                    if (dailyPrayer.isNotEmpty()) {
                         _waktuSolat.value = parsePrayerTimes(dailyPrayer)
 
                         _upcomingPrayer.value = parseNextPrayer()
 
-                        _countdown.value = _upcomingPrayer.value!!.time - System.currentTimeMillis()
+                        _countdown.value =
+                            (_upcomingPrayer.value?.time ?: currTimeMillis) - currTimeMillis
 
-                        alarmSchedulerRepository.schedule(_upcomingPrayer.value!!)
+                        // TODO: Need to be refactored...
+                        // alarmSchedulerRepository.schedule(_upcomingPrayer.value!!)
                     }
 
                     _uiState.value = PrayerTimeUiState.Success
@@ -112,61 +95,78 @@ class PrayerTimeViewModel @Inject constructor(
         }
     }
 
-    private fun parsePrayerTimes(dailyPrayer: PrayerTimeAndDetails): WaktuSolat {
-        val prayers = listOf(
-            Prayer(
-                name = "Subuh",
-                time = (dailyPrayer.time.fajr.toString() + "000").toLong()
-            ),
-            Prayer(
-                name = "Zohor",
-                time = (dailyPrayer.time.dhuhr.toString() + "000").toLong()
-            ),
-            Prayer(
-                name = "Asar",
-                time = (dailyPrayer.time.asr.toString() + "000").toLong()
-            ),
-            Prayer(
-                name = "Maghrib",
-                time = (dailyPrayer.time.maghrib.toString() + "000").toLong()
-            ),
-            Prayer(
-                name = "Isyak",
-                time = (dailyPrayer.time.isha.toString() + "000").toLong()
-            )
-        )
+    private fun parsePrayerTimes(dailyPrayer: List<DailyPrayerDetails>): List<WaktuSolat> {
+        val prayers = mutableListOf<WaktuSolat>()
 
-        return WaktuSolat(
-            year = dailyPrayer.details.year,
-            month = dailyPrayer.details.monthNumber,
-            day = dailyPrayer.time.day,
-            hijri = dailyPrayer.time.hijri,
-            prayers = prayers
-        )
+        dailyPrayer.forEach { prayer ->
+            prayers.addAll(
+                listOf(
+                    WaktuSolat(
+                        year = prayer.year,
+                        month = prayer.month,
+                        day = prayer.day,
+                        name = "Subuh",
+                        time = (prayer.fajr.toString() + "000").toLong()
+                    ),
+                    WaktuSolat(
+                        year = prayer.year,
+                        month = prayer.month,
+                        day = prayer.day,
+                        name = "Zohor",
+                        time = (prayer.dhuhr.toString() + "000").toLong()
+                    ),
+                    WaktuSolat(
+                        year = prayer.year,
+                        month = prayer.month,
+                        day = prayer.day,
+                        name = "Asar",
+                        time = (prayer.asr.toString() + "000").toLong()
+                    ),
+                    WaktuSolat(
+                        year = prayer.year,
+                        month = prayer.month,
+                        day = prayer.day,
+                        name = "Maghrib",
+                        time = (prayer.maghrib.toString() + "000").toLong()
+                    ),
+                    WaktuSolat(
+                        year = prayer.year,
+                        month = prayer.month,
+                        day = prayer.day,
+                        name = "Isyak",
+                        time = (prayer.isha.toString() + "000").toLong()
+                    )
+                )
+            )
+        }
+
+        return prayers
     }
 
-    private fun parseNextPrayer(): Prayer? {
-        return _waktuSolat.value?.prayers?.find { prayer ->
-            val currentTime = System.currentTimeMillis()
+    private fun parseNextPrayer(): WaktuSolat? {
+        val prayers = _waktuSolat.value
+        val currentTime = System.currentTimeMillis()
 
-            prayer.time > currentTime
+        return if (prayers.isNotEmpty()) {
+            prayers.find { it.time > currentTime }
+        } else {
+            null
         }
     }
 
     fun calculateTimeLeft() {
         viewModelScope.launch {
-            while (_countdown.value > 0) {
-                delay(1000)
-                _countdown.value = _upcomingPrayer.value!!.time - System.currentTimeMillis()
-            }
+            val upcomingPrayer = _upcomingPrayer.value
 
-            if (_upcomingPrayer.value!!.name == "Isyak") {
-                date = SolatDateTime.tomorrowEpochMilli()
-                dataStore.setPreviousIsyakPrayer(_upcomingPrayer.value!!.time)
-                refresh()
-            } else {
+            if (upcomingPrayer != null) {
+                while (_countdown.value > 0) {
+                    delay(1000)
+
+                    _countdown.value = upcomingPrayer.time - System.currentTimeMillis()
+                }
+
                 _upcomingPrayer.value = parseNextPrayer()
-                _countdown.value = _upcomingPrayer.value!!.time - System.currentTimeMillis()
+                _countdown.value = upcomingPrayer.time - System.currentTimeMillis()
             }
         }
     }
@@ -187,11 +187,6 @@ data class WaktuSolat(
     val year: Int = 0,
     val month: Int = 0,
     val day: Int = 0,
-    val hijri: String = "",
-    val prayers: List<Prayer> = emptyList()
-)
-
-data class Prayer(
     val name: String = "",
     val time: Long = 0L
 )

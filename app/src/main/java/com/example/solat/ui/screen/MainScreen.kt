@@ -43,9 +43,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.solat.ui.component.EmptyContent
 import com.example.solat.ui.component.ErrorContent
 import com.example.solat.ui.component.LoadingContent
-import com.example.solat.ui.viewmodel.Prayer
 import com.example.solat.ui.viewmodel.PrayerTimeUiState
 import com.example.solat.ui.viewmodel.PrayerTimeViewModel
+import com.example.solat.ui.viewmodel.WaktuSolat
 import com.example.solat.util.SolatDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +64,7 @@ fun MainScreen(
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
 
     LaunchedEffect(upcomingPrayer) {
-        if (waktuSolat != null) {
+        if (waktuSolat.isNotEmpty()) {
             viewModel.calculateTimeLeft()
         }
     }
@@ -103,7 +103,7 @@ fun MainScreen(
             }
 
             is PrayerTimeUiState.Success -> {
-                if (waktuSolat == null) {
+                if (waktuSolat.isEmpty()) {
                     EmptyContent(
                         message = "No prayer time to display.",
                         onRefresh = { viewModel.refresh() }
@@ -154,7 +154,7 @@ fun MainScreen(
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 PrayerTimeCard(
                                     date = date,
-                                    times = waktuSolat.prayers,
+                                    times = waktuSolat,
                                     currentPrayer = upcomingPrayer?.time ?: 0L,
                                     modifier = Modifier.padding(
                                         horizontal = 16.dp,
@@ -246,7 +246,7 @@ private fun ZoneLocationButton(
 
 @Composable
 private fun NextPrayer(
-    prayer: Prayer?,
+    prayer: WaktuSolat?,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -327,10 +327,15 @@ private fun NextPrayerCountdown(
 @Composable
 private fun PrayerTimeCard(
     date: Long,
-    times: List<Prayer>,
+    times: List<WaktuSolat>,
     currentPrayer: Long,
     modifier: Modifier = Modifier
 ) {
+    val currDate = SolatDateTime.formatDate(
+        date = SolatDateTime.nowEpochMilli(),
+        format = "uuuu-MM-dd"
+    ).split("-").map { it.toInt() }
+
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(24.dp),
@@ -364,44 +369,45 @@ private fun PrayerTimeCard(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                times.forEach { (name, time) ->
-                    Column(
-                        modifier = Modifier.padding(
-                            vertical = 16.dp
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = name,
-                                fontWeight = FontWeight.Normal,
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                            Text(
-                                text = SolatDateTime.formatDate(
-                                    date = time,
-                                    format = "h:mm a"
-                                ).lowercase(),
-                                fontWeight = FontWeight.SemiBold,
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        }
-                        if (time == currentPrayer) {
-                            Box(
-                                modifier = Modifier
-                                    .width(32.dp)
-                                    .height(6.dp)
-                                    .background(
-                                        color = MaterialTheme.colorScheme.primary,
-                                        shape = RoundedCornerShape(50)
-                                    )
-                            )
-                        } else {
-                            Box(modifier = Modifier.height(6.dp))
+                times.filter { it.year == currDate[0] && it.month == currDate[1] && it.day == currDate[2] }
+                    .forEach { (_, _, _, name, time) ->
+                        Column(
+                            modifier = Modifier.padding(
+                                vertical = 16.dp
+                            ),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = name,
+                                    fontWeight = FontWeight.Normal,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                                Text(
+                                    text = SolatDateTime.formatDate(
+                                        date = time,
+                                        format = "h:mm a"
+                                    ).lowercase(),
+                                    fontWeight = FontWeight.SemiBold,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
+                            if (time == currentPrayer) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(32.dp)
+                                        .height(6.dp)
+                                        .background(
+                                            color = MaterialTheme.colorScheme.primary,
+                                            shape = RoundedCornerShape(50)
+                                        )
+                                )
+                            } else {
+                                Box(modifier = Modifier.height(6.dp))
+                            }
                         }
                     }
-                }
             }
         }
     }

@@ -8,7 +8,7 @@ import androidx.room.Transaction
 import com.example.solat.data.local.entity.PrayerDetails
 import com.example.solat.data.local.entity.PrayerTime
 import com.example.solat.data.local.entity.Zone
-import com.example.solat.data.local.entity.relationship.PrayerTimeAndDetails
+import com.example.solat.data.local.entity.derived.DailyPrayerDetails
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -27,23 +27,35 @@ interface SolatDao {
     fun loadZoneById(zoneId: Int): Flow<Zone>
 
     /**
-     * A Dao's transaction method to fetch prayer details with times based on [zoneId], [year], and [month].
+     * [year], [month], and [day] should has only __2__ values that represent next year/month/day.
      *
-     * @return a flow of [PrayerDetailsAndTime] object or `null`.
+     * @return list of [DailyPrayerDetails] for today and tomorrow. List size should be __2__.
      */
     @Transaction
     @Query(
-        value = "SELECT * " +
+        value = "SELECT " +
+                "   pd.zone_id, pd.prayer_details_id, pd.year, pd.month_number," +
+                "   pt.prayer_time_id, pt.day, pt.fajr, pt.dhuhr, pt.asr, pt.maghrib, pt.isha " +
                 "FROM prayer_time pt " +
                 "INNER JOIN prayer_details pd ON pd.prayer_details_id = pt.prayer_details_id " +
-                "WHERE pd.zone_id = :zoneId AND pd.year = :year AND pd.month_number = :month AND pt.day = :day "
+                "WHERE pd.zone_id = :zoneId AND pd.year IN (:year) AND pd.month_number IN (:month) AND pt.day IN (:day) "
     )
-    fun loadPrayer(
+    fun loadDailyPrayers(
         zoneId: Int,
+        year: List<Int>,
+        month: List<Int>,
+        day: List<Int>
+    ): Flow<List<DailyPrayerDetails>>
+
+    @Query(
+        value = "SELECT * " +
+                "FROM prayer_details " +
+                "WHERE year = :year AND month_number = :month"
+    )
+    suspend fun hasPrayerOnYearAndMonth(
         year: Int,
-        month: Int,
-        day: Int
-    ): Flow<PrayerTimeAndDetails?>
+        month: Int
+    ): PrayerDetails?
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertZones(zones: List<Zone>): List<Long>
