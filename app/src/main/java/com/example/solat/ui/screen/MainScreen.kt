@@ -56,7 +56,6 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     viewModel: PrayerTimeViewModel = hiltViewModel()
 ) {
-    val date = viewModel.date
     val zone = viewModel.zone.collectAsStateWithLifecycle().value
     val waktuSolat = viewModel.waktuSolat.collectAsStateWithLifecycle().value
     val upcomingPrayer = viewModel.upcomingPrayer.collectAsStateWithLifecycle().value
@@ -153,7 +152,6 @@ fun MainScreen(
                             // Bottom content
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 PrayerTimeCard(
-                                    date = date,
                                     times = waktuSolat,
                                     currentPrayer = upcomingPrayer?.time ?: 0L,
                                     modifier = Modifier.padding(
@@ -326,13 +324,17 @@ private fun NextPrayerCountdown(
 
 @Composable
 private fun PrayerTimeCard(
-    date: Long,
     times: List<WaktuSolat>,
     currentPrayer: Long,
     modifier: Modifier = Modifier
 ) {
-    val currDate = SolatDateTime.formatDate(
-        date = SolatDateTime.nowEpochMilli(),
+    val isTodayIshaPassed = System.currentTimeMillis() > times[4].time
+
+    val currDate =
+        if (isTodayIshaPassed) SolatDateTime.tomorrowEpochMilli() else SolatDateTime.nowEpochMilli()
+
+    val splitDate = SolatDateTime.formatDate(
+        date = currDate,
         format = "uuuu-MM-dd"
     ).split("-").map { it.toInt() }
 
@@ -357,7 +359,7 @@ private fun PrayerTimeCard(
                 }
                 Text(
                     text = SolatDateTime.formatDate(
-                        date = date,
+                        date = currDate,
                         format = "EEEE, dd/MM/uuuu"
                     ),
                     fontWeight = FontWeight.Normal,
@@ -369,7 +371,7 @@ private fun PrayerTimeCard(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                times.filter { it.year == currDate[0] && it.month == currDate[1] && it.day == currDate[2] }
+                times.filter { it.day == splitDate[2] }
                     .forEach { (_, _, _, name, time) ->
                         Column(
                             modifier = Modifier.padding(
