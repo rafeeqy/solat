@@ -38,13 +38,20 @@ interface SolatDao {
                 "   pt.prayer_time_id, pt.day, pt.fajr, pt.dhuhr, pt.asr, pt.maghrib, pt.isha " +
                 "FROM prayer_time pt " +
                 "INNER JOIN prayer_details pd ON pd.prayer_details_id = pt.prayer_details_id " +
-                "WHERE pd.zone_id = :zoneId AND pd.year IN (:year) AND pd.month_number IN (:month) AND pt.day IN (:day) "
+                "WHERE pd.zone_id = :zoneId AND " +
+                "   (" +
+                "       (pd.year = :todayYear AND pd.month_number = :todayMonth AND pt.day = :today) OR " +
+                "       (pd.year = :tomorrowYear AND pd.month_number = :tomorrowMonth AND pt.day = :tomorrow)" +
+                "   )"
     )
     fun loadDailyPrayers(
         zoneId: Int,
-        year: List<Int>,
-        month: List<Int>,
-        day: List<Int>
+        todayYear: Int,
+        tomorrowYear: Int,
+        todayMonth: Int,
+        tomorrowMonth: Int,
+        today: Int,
+        tomorrow: Int
     ): Flow<List<DailyPrayerDetails>>
 
     @Query(
