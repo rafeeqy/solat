@@ -1,6 +1,7 @@
 package com.example.solat.data.local.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -27,7 +28,7 @@ interface SolatDao {
     fun loadZoneById(zoneId: Int): Flow<Zone>
 
     /**
-     * [year], [month], and [day] should has only __2__ values that represent next year/month/day.
+     * Fetch prayers for today and tomorrow.
      *
      * @return list of [DailyPrayerDetails] for today and tomorrow. List size should be __2__.
      */
@@ -54,12 +55,27 @@ interface SolatDao {
         tomorrow: Int
     ): Flow<List<DailyPrayerDetails>>
 
+    @Transaction
+    @Query(
+        value = "SELECT " +
+                "   pd.zone_id, pd.prayer_details_id, pd.year, pd.month_number," +
+                "   pt.prayer_time_id, pt.day, pt.fajr, pt.dhuhr, pt.asr, pt.maghrib, pt.isha " +
+                "FROM prayer_time pt " +
+                "INNER JOIN prayer_details pd ON pd.prayer_details_id = pt.prayer_details_id " +
+                "WHERE pd.year = :year AND pd.month_number = :month AND pt.day = :day"
+    )
+    fun loadPrayer(
+        year: Int,
+        month: Int,
+        day: Int
+    ): DailyPrayerDetails?
+
     @Query(
         value = "SELECT * " +
                 "FROM prayer_details " +
                 "WHERE year = :year AND month_number = :month"
     )
-    suspend fun hasPrayerOnYearAndMonth(
+    fun hasPrayerOnYearAndMonth(
         year: Int,
         month: Int
     ): PrayerDetails?
@@ -94,4 +110,10 @@ interface SolatDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPrayerTimes(prayerTimes: List<PrayerTime>): List<Long>
+
+    @Query(
+        value = "DELETE FROM prayer_details " +
+                "WHERE zone_id = :zoneId"
+    )
+    suspend fun deletePrayerDetailsByZoneId(zoneId: Int)
 }

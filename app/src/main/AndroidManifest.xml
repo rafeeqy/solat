@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".di.SolatApplication"
@@ -36,7 +37,7 @@
 
         <!-- Broadcast receiver -->
         <receiver
-            android:name=".alarm.AlarmReceiver"
+            android:name=".jobs.alarm.AlarmReceiver"
             android:exported="false" />
     </application>
 

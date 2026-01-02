@@ -1,7 +1,7 @@
 package com.example.solat.di
 
 import androidx.work.WorkManager
-import com.example.solat.alarm.AlarmSchedulerRepository
+import com.example.solat.jobs.alarm.AlarmSchedulerRepository
 import com.example.solat.data.local.dao.SolatDao
 import com.example.solat.data.preference.datastore.PreferenceStorage
 import com.example.solat.data.remote.service.WaktuSolatApiService
@@ -24,9 +24,10 @@ object SolatApplicationModule {
     fun provideSolatRepository(
         waktuSolatApiService: WaktuSolatApiService,
         solatDao: SolatDao,
+        dataStore: PreferenceStorage,
         workManager: WorkManager
     ): SolatRepository {
-        return OfflineSolatRepository(waktuSolatApiService, solatDao, workManager)
+        return OfflineSolatRepository(waktuSolatApiService, solatDao, dataStore, workManager)
     }
 
     @Provides

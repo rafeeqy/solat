@@ -2,11 +2,11 @@ package com.example.solat.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.solat.alarm.AlarmSchedulerRepository
 import com.example.solat.data.local.entity.Zone
-import com.example.solat.data.local.entity.derived.DailyPrayerDetails
 import com.example.solat.data.preference.datastore.PreferenceStorage
+import com.example.solat.data.repository.Prayer
 import com.example.solat.data.repository.SolatRepository
+import com.example.solat.jobs.alarm.AlarmSchedulerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -76,8 +76,11 @@ class PrayerTimeViewModel @Inject constructor(
                         _countdown.value =
                             (_upcomingPrayer.value?.time ?: currTimeMillis) - currTimeMillis
 
-                        // TODO: Need to be refactored...
-                        // alarmSchedulerRepository.schedule(_upcomingPrayer.value!!)
+                        alarmSchedulerRepository.schedule(
+                            _zoneId.value,
+                            _zone.value!!.code,
+                            _upcomingPrayer.value?.time ?: currTimeMillis
+                        )
                     }
 
                     _uiState.value = PrayerTimeUiState.Success
@@ -86,48 +89,20 @@ class PrayerTimeViewModel @Inject constructor(
         }
     }
 
-    private fun parsePrayerTimes(dailyPrayer: List<DailyPrayerDetails>): List<WaktuSolat> {
+    private fun parsePrayerTimes(dailyPrayer: List<Prayer>): List<WaktuSolat> {
         val prayers = mutableListOf<WaktuSolat>()
 
         dailyPrayer.forEach { prayer ->
             prayers.addAll(
-                listOf(
+                prayer.prayers.map {
                     WaktuSolat(
                         year = prayer.year,
                         month = prayer.month,
                         day = prayer.day,
-                        name = "Subuh",
-                        time = (prayer.fajr.toString() + "000").toLong()
-                    ),
-                    WaktuSolat(
-                        year = prayer.year,
-                        month = prayer.month,
-                        day = prayer.day,
-                        name = "Zohor",
-                        time = (prayer.dhuhr.toString() + "000").toLong()
-                    ),
-                    WaktuSolat(
-                        year = prayer.year,
-                        month = prayer.month,
-                        day = prayer.day,
-                        name = "Asar",
-                        time = (prayer.asr.toString() + "000").toLong()
-                    ),
-                    WaktuSolat(
-                        year = prayer.year,
-                        month = prayer.month,
-                        day = prayer.day,
-                        name = "Maghrib",
-                        time = (prayer.maghrib.toString() + "000").toLong()
-                    ),
-                    WaktuSolat(
-                        year = prayer.year,
-                        month = prayer.month,
-                        day = prayer.day,
-                        name = "Isyak",
-                        time = (prayer.isha.toString() + "000").toLong()
+                        name = it.key.label,
+                        time = it.value
                     )
-                )
+                }
             )
         }
 

@@ -2,14 +2,14 @@ package com.example.solat.data.repository
 
 import com.example.solat.data.local.entity.Zone
 import com.example.solat.data.local.entity.derived.DailyPrayerDetails
-import com.example.solat.data.local.entity.relationship.PrayerTimeAndDetails
 import kotlinx.coroutines.flow.Flow
 
 interface SolatRepository {
     suspend fun remoteFetchAllZones(): List<Long>
 
     suspend fun remoteFetchPrayerTimes(
-        zone: Zone,
+        zoneId: Int,
+        zoneCode: String,
         year: Int,
         month: Int
     ): Map<Long, List<Long>>
@@ -20,5 +20,13 @@ interface SolatRepository {
 
     fun fetchDailyPrayers(
         zone: Zone
-    ): Flow<List<DailyPrayerDetails>>
+    ): Flow<List<Prayer>>
+
+    fun fetchCurrentPrayer(
+        zoneId: Int,
+        zoneCode: String,
+        date: Long
+    ): Prayer?
+
+    suspend fun deletePrayerByZone(zoneId: Int)
 }
