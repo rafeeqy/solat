@@ -1,26 +1,33 @@
 package com.example.solat.data.repository
 
 import android.util.Log
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.work.WorkManager
 import com.example.solat.data.local.dao.SolatDao
 import com.example.solat.data.local.entity.PrayerDetails
 import com.example.solat.data.local.entity.PrayerTime
 import com.example.solat.data.local.entity.Zone
 import com.example.solat.data.local.entity.derived.DailyPrayerDetails
+import com.example.solat.data.preference.datastore.DataStoreManager
+import com.example.solat.data.preference.datastore.PreferenceStorage
 import com.example.solat.data.remote.service.WaktuSolatApiService
 import com.example.solat.util.NextDayStatus
 import com.example.solat.util.SolatDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 class OfflineSolatRepository @Inject constructor(
     private val waktuSolatApiService: WaktuSolatApiService,
     private val solatDao: SolatDao,
+    private val dataStore: PreferenceStorage,
     private val workManager: WorkManager
 ) : SolatRepository {
     override suspend fun remoteFetchAllZones(): List<Long> {
@@ -39,15 +46,16 @@ class OfflineSolatRepository @Inject constructor(
     }
 
     override suspend fun remoteFetchPrayerTimes(
-        zone: Zone,
+        zoneId: Int,
+        zoneCode: String,
         year: Int,
         month: Int
     ): Map<Long, List<Long>> {
-        val prayer = waktuSolatApiService.getPrayerTimes(zone.code, year, month)
+        val prayer = waktuSolatApiService.getPrayerTimes(zoneCode, year, month)
 
         return solatDao.insertPrayerDetailsAndTimes(
             prayerDetails = PrayerDetails(
-                zoneId = zone.zoneId,
+                zoneId = zoneId,
                 year = prayer.year,
                 month = prayer.month,
                 monthNumber = prayer.monthNumber,
@@ -80,7 +88,7 @@ class OfflineSolatRepository @Inject constructor(
 
     override fun fetchDailyPrayers(
         zone: Zone
-    ): Flow<List<DailyPrayerDetails>> = flow {
+    ): Flow<List<Prayer>> = flow {
         val today = SolatDateTime.splitDate(SolatDateTime.nowEpochMilli())
         val tomorrow = SolatDateTime.splitDate(SolatDateTime.tomorrowEpochMilli())
         val tomorrowStatus = SolatDateTime.nextDayStatus()
@@ -90,7 +98,7 @@ class OfflineSolatRepository @Inject constructor(
             solatDao.hasPrayerOnYearAndMonth(tomorrow.year, tomorrow.month) == null
         ) {
             try {
-                remoteFetchPrayerTimes(zone, tomorrow.year, tomorrow.month)
+                remoteFetchPrayerTimes(zone.zoneId, zone.code, tomorrow.year, tomorrow.month)
             } catch (e: Exception) {
                 Log.e("FETCHDAILYPRAYERS", "Error: ${e.message}")
             }
@@ -105,7 +113,76 @@ class OfflineSolatRepository @Inject constructor(
                 tomorrowMonth = tomorrow.month,
                 today = today.day,
                 tomorrow = tomorrow.day,
-            )
+            ).map { prayerDetails ->
+                if (prayerDetails.isNotEmpty()) {
+                    prayerDetails.map {
+                        Prayer(
+                            zoneId = zone.zoneId,
+                            zoneCode = zone.code,
+                            year = it.year,
+                            month = it.month,
+                            day = it.day,
+                            prayers = parsePrayerTimes(it)
+                        )
+                    }
+                } else {
+                    emptyList()
+                }
+            }
         )
     }.flowOn(context = Dispatchers.IO)
+
+    override fun fetchCurrentPrayer(
+        zoneId: Int,
+        zoneCode: String,
+        date: Long
+    ): Prayer? {
+        val today = SolatDateTime.splitDate(date)
+
+        val dailyPrayer = solatDao.loadPrayer(today.year, today.month, today.day)
+        val prayer = if (dailyPrayer != null) {
+            Prayer(
+                zoneId = zoneId,
+                zoneCode = zoneCode,
+                year = dailyPrayer.year,
+                month = dailyPrayer.month,
+                day = dailyPrayer.day,
+                prayers = parsePrayerTimes(dailyPrayer)
+            )
+        } else {
+            null
+        }
+
+        return prayer
+    }
+
+    override suspend fun deletePrayerByZone(zoneId: Int) =
+        solatDao.deletePrayerDetailsByZoneId(zoneId)
+
+    private fun parsePrayerTimes(prayers: DailyPrayerDetails): Map<PrayerNames, Long> {
+        return mapOf(
+            PrayerNames.FAJR to (prayers.fajr.toString() + "000").toLong(),
+            PrayerNames.DHUHR to (prayers.dhuhr.toString() + "000").toLong(),
+            PrayerNames.ASR to (prayers.asr.toString() + "000").toLong(),
+            PrayerNames.MAGHRIB to (prayers.maghrib.toString() + "000").toLong(),
+            PrayerNames.ISHA to (prayers.isha.toString() + "000").toLong()
+        )
+    }
+}
+
+data class Prayer(
+    val zoneId: Int,
+    val zoneCode: String,
+    val year: Int,
+    val month: Int,
+    val day: Int,
+    val prayers: Map<PrayerNames, Long>
+)
+
+enum class PrayerNames(val label: String) {
+    FAJR("Subuh"),
+    DHUHR("Zohor"),
+    ASR("Asar"),
+    MAGHRIB("Maghrib"),
+    ISHA("Isyak")
 }

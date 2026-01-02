@@ -1,4 +1,4 @@
-package com.example.solat.navigation.route
+package com.example.solat.ui.navigation.route
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController

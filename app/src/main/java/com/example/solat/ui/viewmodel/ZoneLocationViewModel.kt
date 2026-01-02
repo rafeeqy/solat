@@ -69,7 +69,10 @@ class ZoneLocationViewModel @Inject constructor(
 
     suspend fun selectZone(zone: Zone): CatchError {
         return try {
+            solatRepository.deletePrayerByZone(currentZoneId) // Delete previous zone prayers
+
             dataStore.setCurrentZoneId(zone.zoneId)
+            dataStore.setZoneCode(zone.code)
 
             val currentDate = SolatDateTime.formatDate(
                 date = SolatDateTime.nowEpochMilli(),
@@ -77,7 +80,8 @@ class ZoneLocationViewModel @Inject constructor(
             ).split("-")
 
             solatRepository.remoteFetchPrayerTimes(
-                zone = zone,
+                zoneId = zone.zoneId,
+                zoneCode = zone.code,
                 year = currentDate[0].toInt(),
                 month = currentDate[1].toInt()
             )

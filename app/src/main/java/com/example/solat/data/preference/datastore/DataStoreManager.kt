@@ -25,6 +25,7 @@ class DataStoreManager @Inject constructor(context: Context) : PreferenceStorage
 
     private object PreferencesKeys {
         val ZONE = intPreferencesKey(name = "zone")
+        val ZONE_CODE = stringPreferencesKey(name = "zone_code")
         val THEME = stringPreferencesKey(name = "theme")
         val LOCALE = stringPreferencesKey(name = "locale")
         val ISYAK = longPreferencesKey(name = "isyak")
@@ -45,6 +46,24 @@ class DataStoreManager @Inject constructor(context: Context) : PreferenceStorage
     override suspend fun setCurrentZoneId(zoneId: Int) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ZONE] = zoneId
+        }
+    }
+
+    override fun getZoneCode(): Flow<String?> {
+        return dataStore.data.catch { e ->
+            if (e is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw e
+            }
+        }.map { preferences ->
+            preferences[PreferencesKeys.ZONE_CODE]
+        }
+    }
+
+    override suspend fun setZoneCode(code: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ZONE_CODE] = code
         }
     }
 

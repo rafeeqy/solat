@@ -7,6 +7,10 @@ interface PreferenceStorage {
 
     suspend fun setCurrentZoneId(zoneId: Int)
 
+    fun getZoneCode(): Flow<String?>
+
+    suspend fun setZoneCode(code: String)
+
     fun getTheme(): Flow<String>
 
     suspend fun setTheme(theme: String)
