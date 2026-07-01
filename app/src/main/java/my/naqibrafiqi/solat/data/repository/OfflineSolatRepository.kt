@@ -1,0 +1,184 @@
+package my.naqibrafiqi.solat.data.repository
+
+import android.util.Log
+import androidx.work.WorkManager
+import my.naqibrafiqi.solat.data.local.dao.SolatDao
+import my.naqibrafiqi.solat.data.local.entity.PrayerDetails
+import my.naqibrafiqi.solat.data.local.entity.PrayerTime
+import my.naqibrafiqi.solat.data.local.entity.Zone
+import my.naqibrafiqi.solat.data.local.entity.derived.DailyPrayerDetails
+import my.naqibrafiqi.solat.data.preference.datastore.PreferenceStorage
+import my.naqibrafiqi.solat.data.remote.service.WaktuSolatApiService
+import my.naqibrafiqi.solat.util.NextDayStatus
+import my.naqibrafiqi.solat.util.SolatDateTime
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+
+class OfflineSolatRepository @Inject constructor(
+    private val waktuSolatApiService: WaktuSolatApiService,
+    private val solatDao: SolatDao,
+    private val dataStore: PreferenceStorage,
+    private val workManager: WorkManager
+) : SolatRepository {
+    override suspend fun remoteFetchAllZones(): List<Long> {
+        val zones = waktuSolatApiService.getAllZones()
+
+        return solatDao.insertZones(
+            zones.map { zone ->
+                Zone(
+                    code = zone.jakimCode,
+                    state = zone.negeri,
+                    district = zone.daerah,
+                    createdDate = SolatDateTime.nowEpochMilli()
+                )
+            }
+        )
+    }
+
+    override suspend fun remoteFetchPrayerTimes(
+        zoneId: Int,
+        zoneCode: String,
+        year: Int,
+        month: Int
+    ): Map<Long, List<Long>> {
+        val prayer = waktuSolatApiService.getPrayerTimes(zoneCode, year, month)
+
+        return solatDao.insertPrayerDetailsAndTimes(
+            prayerDetails = PrayerDetails(
+                zoneId = zoneId,
+                year = prayer.year,
+                month = prayer.month,
+                monthNumber = prayer.monthNumber,
+                apiLastUpdated = prayer.lastUpdated,
+                createdDate = SolatDateTime.nowEpochMilli()
+            ),
+            prayerTimes = prayer.prayers.map { time ->
+                PrayerTime(
+                    prayerDetailsId = 0,
+                    day = time.day,
+                    hijri = time.hijri,
+                    fajr = time.fajr,
+                    syuruk = time.syuruk,
+                    dhuhr = time.dhuhr,
+                    asr = time.asr,
+                    maghrib = time.maghrib,
+                    isha = time.isha,
+                    createdDate = SolatDateTime.nowEpochMilli()
+                )
+            }
+        )
+    }
+
+    override fun fetchAllZones(): Flow<List<Zone>> =
+        solatDao.loadAllZones()
+
+    override fun fetchZoneById(zoneId: Int): Flow<Zone?> {
+        return if (zoneId > 0) solatDao.loadZoneById(zoneId) else flowOf(null)
+    }
+
+    override fun fetchDailyPrayers(
+        zone: Zone
+    ): Flow<List<Prayer>> = flow {
+        val today = SolatDateTime.splitDate(SolatDateTime.nowEpochMilli())
+        val tomorrow = SolatDateTime.splitDate(SolatDateTime.tomorrowEpochMilli())
+        val tomorrowStatus = SolatDateTime.nextDayStatus()
+
+        if (
+            tomorrowStatus != NextDayStatus.NO_CHANGES &&
+            solatDao.hasPrayerOnYearAndMonth(tomorrow.year, tomorrow.month) == null
+        ) {
+            try {
+                remoteFetchPrayerTimes(zone.zoneId, zone.code, tomorrow.year, tomorrow.month)
+            } catch (e: Exception) {
+                Log.e("FETCHDAILYPRAYERS", "Error: ${e.message}")
+            }
+        }
+
+        emitAll(
+            solatDao.loadDailyPrayers(
+                zone.zoneId,
+                todayYear = today.year,
+                tomorrowYear = tomorrow.year,
+                todayMonth = today.month,
+                tomorrowMonth = tomorrow.month,
+                today = today.day,
+                tomorrow = tomorrow.day,
+            ).map { prayerDetails ->
+                if (prayerDetails.isNotEmpty()) {
+                    prayerDetails.map {
+                        Prayer(
+                            zoneId = zone.zoneId,
+                            zoneCode = zone.code,
+                            year = it.year,
+                            month = it.month,
+                            day = it.day,
+                            prayers = parsePrayerTimes(it)
+                        )
+                    }
+                } else {
+                    emptyList()
+                }
+            }
+        )
+    }.flowOn(context = Dispatchers.IO)
+
+    override fun fetchCurrentPrayer(
+        zoneId: Int,
+        zoneCode: String,
+        date: Long
+    ): Prayer? {
+        val today = SolatDateTime.splitDate(date)
+
+        val dailyPrayer = solatDao.loadPrayer(today.year, today.month, today.day)
+        val prayer = if (dailyPrayer != null) {
+            Prayer(
+                zoneId = zoneId,
+                zoneCode = zoneCode,
+                year = dailyPrayer.year,
+                month = dailyPrayer.month,
+                day = dailyPrayer.day,
+                prayers = parsePrayerTimes(dailyPrayer)
+            )
+        } else {
+            null
+        }
+
+        return prayer
+    }
+
+    override suspend fun deletePrayerByZone(zoneId: Int) =
+        solatDao.deletePrayerDetailsByZoneId(zoneId)
+
+    private fun parsePrayerTimes(prayers: DailyPrayerDetails): Map<PrayerNames, Long> {
+        return mapOf(
+            PrayerNames.FAJR to (prayers.fajr.toString() + "000").toLong(),
+            PrayerNames.DHUHR to (prayers.dhuhr.toString() + "000").toLong(),
+            PrayerNames.ASR to (prayers.asr.toString() + "000").toLong(),
+            PrayerNames.MAGHRIB to (prayers.maghrib.toString() + "000").toLong(),
+            PrayerNames.ISHA to (prayers.isha.toString() + "000").toLong()
+        )
+    }
+}
+
+data class Prayer(
+    val zoneId: Int,
+    val zoneCode: String,
+    val year: Int,
+    val month: Int,
+    val day: Int,
+    val prayers: Map<PrayerNames, Long>
+)
+
+enum class PrayerNames(val label: String) {
+    FAJR("Subuh"),
+    DHUHR("Zohor"),
+    ASR("Asar"),
+    MAGHRIB("Maghrib"),
+    ISHA("Isyak")
+}
