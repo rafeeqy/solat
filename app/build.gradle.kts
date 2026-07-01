@@ -12,13 +12,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.solat"
+    namespace = "my.naqibrafiqi.solat"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.example.solat"
+        applicationId = "my.naqibrafiqi.solat"
         minSdk = 29
         targetSdk = 36
         versionCode = 1
