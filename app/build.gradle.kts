@@ -1,10 +1,14 @@
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("org.jetbrains.kotlin.plugin.serialization")
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.kotlin.serialization)
     id("com.google.dagger.hilt.android")
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -15,10 +19,15 @@ android {
 
     defaultConfig {
         applicationId = "com.example.solat"
-        minSdk = 31
+        minSdk = 29
         targetSdk = 36
         versionCode = 1
-        versionName = "v0.0.6"
+        versionName = "1.0.0"
+
+        val dateFormat = SimpleDateFormat("h:mm a, dd/MM/yyyy", Locale.getDefault())
+        val buildTime = dateFormat.format(Date())
+
+        buildConfigField("String", "BUILD_TIME", "\"$buildTime\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -40,6 +49,7 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 
@@ -62,7 +72,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     // Google Fonts
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.9.5")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.11.3")
 
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
