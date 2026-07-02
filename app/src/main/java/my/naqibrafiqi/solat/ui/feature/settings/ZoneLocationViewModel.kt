@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
-import my.naqibrafiqi.solat.data.local.datastore.PreferenceStorage
+import my.naqibrafiqi.solat.data.local.datastore.SolatDataStore
 import my.naqibrafiqi.solat.data.local.db.entity.ZoneEntity
 import my.naqibrafiqi.solat.domain.repository.SolatRepository
 import my.naqibrafiqi.solat.util.CatchError
@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ZoneLocationViewModel @Inject constructor(
-    private val dataStore: PreferenceStorage,
+    private val dataStore: SolatDataStore,
     private val solatRepository: SolatRepository
 ) : ViewModel() {
     var currentZoneId: Int by mutableIntStateOf(0)

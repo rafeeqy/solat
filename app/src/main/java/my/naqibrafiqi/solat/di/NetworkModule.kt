@@ -13,7 +13,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object NetworkApiModule {
+object NetworkModule {
     @Singleton
     @Provides
     fun provideRetrofit(): Retrofit {
