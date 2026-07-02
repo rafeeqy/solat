@@ -37,7 +37,7 @@
 
         <!-- Broadcast receiver -->
         <receiver
-            android:name=".jobs.alarm.AlarmReceiver"
+            android:name=".data.jobs.alarm.AlarmReceiver"
             android:exported="false" />
     </application>
 

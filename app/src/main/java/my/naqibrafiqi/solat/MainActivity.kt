@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import my.naqibrafiqi.solat.ui.theme.SolatTheme
 import dagger.hilt.android.AndroidEntryPoint
+import my.naqibrafiqi.solat.ui.navigation.route.OnboardingRoutes
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -14,7 +15,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SolatTheme {
-                SolatApp()
+                SolatApp(startDestination = OnboardingRoutes.WelcomeRoute)
             }
         }
     }
