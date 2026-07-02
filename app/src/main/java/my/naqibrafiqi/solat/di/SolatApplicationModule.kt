@@ -1,19 +1,19 @@
 package my.naqibrafiqi.solat.di
 
 import androidx.work.WorkManager
-import my.naqibrafiqi.solat.jobs.alarm.AlarmSchedulerRepository
-import my.naqibrafiqi.solat.data.local.dao.SolatDao
-import my.naqibrafiqi.solat.data.preference.datastore.PreferenceStorage
-import my.naqibrafiqi.solat.data.remote.service.WaktuSolatApiService
-import my.naqibrafiqi.solat.data.repository.OfflineSolatRepository
-import my.naqibrafiqi.solat.data.repository.SolatRepository
-import my.naqibrafiqi.solat.ui.viewmodel.OnboardingViewModel
-import my.naqibrafiqi.solat.ui.viewmodel.PrayerTimeViewModel
-import my.naqibrafiqi.solat.ui.viewmodel.ZoneLocationViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import my.naqibrafiqi.solat.data.jobs.alarm.AlarmSchedulerRepository
+import my.naqibrafiqi.solat.data.local.datastore.PreferenceStorage
+import my.naqibrafiqi.solat.data.local.db.dao.SolatDao
+import my.naqibrafiqi.solat.data.remote.WaktuSolatApiService
+import my.naqibrafiqi.solat.data.repository.OfflineSolatRepository
+import my.naqibrafiqi.solat.domain.repository.SolatRepository
+import my.naqibrafiqi.solat.ui.feature.viewmodel.OnboardingViewModel
+import my.naqibrafiqi.solat.ui.feature.prayer.PrayerTimeViewModel
+import my.naqibrafiqi.solat.ui.feature.settings.ZoneLocationViewModel
 import javax.inject.Singleton
 
 @Module

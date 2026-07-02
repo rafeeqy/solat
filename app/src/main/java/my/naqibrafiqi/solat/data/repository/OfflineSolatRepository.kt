@@ -2,13 +2,11 @@ package my.naqibrafiqi.solat.data.repository
 
 import android.util.Log
 import androidx.work.WorkManager
-import my.naqibrafiqi.solat.data.local.dao.SolatDao
-import my.naqibrafiqi.solat.data.local.entity.PrayerDetails
-import my.naqibrafiqi.solat.data.local.entity.PrayerTime
-import my.naqibrafiqi.solat.data.local.entity.Zone
-import my.naqibrafiqi.solat.data.local.entity.derived.DailyPrayerDetails
-import my.naqibrafiqi.solat.data.preference.datastore.PreferenceStorage
-import my.naqibrafiqi.solat.data.remote.service.WaktuSolatApiService
+import my.naqibrafiqi.solat.data.local.db.dao.SolatDao
+import my.naqibrafiqi.solat.data.local.db.entity.PrayerDetailsEntity
+import my.naqibrafiqi.solat.data.local.db.entity.PrayerTimeEntity
+import my.naqibrafiqi.solat.data.local.db.entity.ZoneEntity
+import my.naqibrafiqi.solat.data.local.datastore.PreferenceStorage
 import my.naqibrafiqi.solat.util.NextDayStatus
 import my.naqibrafiqi.solat.util.SolatDateTime
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +16,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import my.naqibrafiqi.solat.data.local.db.relationship.DailyPrayerSummary
+import my.naqibrafiqi.solat.data.remote.WaktuSolatApiService
+import my.naqibrafiqi.solat.domain.repository.SolatRepository
 import javax.inject.Inject
 
 class OfflineSolatRepository @Inject constructor(
@@ -31,7 +32,7 @@ class OfflineSolatRepository @Inject constructor(
 
         return solatDao.insertZones(
             zones.map { zone ->
-                Zone(
+                ZoneEntity(
                     code = zone.jakimCode,
                     state = zone.negeri,
                     district = zone.daerah,
@@ -50,7 +51,7 @@ class OfflineSolatRepository @Inject constructor(
         val prayer = waktuSolatApiService.getPrayerTimes(zoneCode, year, month)
 
         return solatDao.insertPrayerDetailsAndTimes(
-            prayerDetails = PrayerDetails(
+            prayerDetailsEntity = PrayerDetailsEntity(
                 zoneId = zoneId,
                 year = prayer.year,
                 month = prayer.month,
@@ -58,8 +59,8 @@ class OfflineSolatRepository @Inject constructor(
                 apiLastUpdated = prayer.lastUpdated,
                 createdDate = SolatDateTime.nowEpochMilli()
             ),
-            prayerTimes = prayer.prayers.map { time ->
-                PrayerTime(
+            prayerTimeEntities = prayer.prayers.map { time ->
+                PrayerTimeEntity(
                     prayerDetailsId = 0,
                     day = time.day,
                     hijri = time.hijri,
@@ -75,15 +76,15 @@ class OfflineSolatRepository @Inject constructor(
         )
     }
 
-    override fun fetchAllZones(): Flow<List<Zone>> =
+    override fun fetchAllZones(): Flow<List<ZoneEntity>> =
         solatDao.loadAllZones()
 
-    override fun fetchZoneById(zoneId: Int): Flow<Zone?> {
+    override fun fetchZoneById(zoneId: Int): Flow<ZoneEntity?> {
         return if (zoneId > 0) solatDao.loadZoneById(zoneId) else flowOf(null)
     }
 
     override fun fetchDailyPrayers(
-        zone: Zone
+        zoneEntity: ZoneEntity
     ): Flow<List<Prayer>> = flow {
         val today = SolatDateTime.splitDate(SolatDateTime.nowEpochMilli())
         val tomorrow = SolatDateTime.splitDate(SolatDateTime.tomorrowEpochMilli())
@@ -94,7 +95,7 @@ class OfflineSolatRepository @Inject constructor(
             solatDao.hasPrayerOnYearAndMonth(tomorrow.year, tomorrow.month) == null
         ) {
             try {
-                remoteFetchPrayerTimes(zone.zoneId, zone.code, tomorrow.year, tomorrow.month)
+                remoteFetchPrayerTimes(zoneEntity.zoneId, zoneEntity.code, tomorrow.year, tomorrow.month)
             } catch (e: Exception) {
                 Log.e("FETCHDAILYPRAYERS", "Error: ${e.message}")
             }
@@ -102,7 +103,7 @@ class OfflineSolatRepository @Inject constructor(
 
         emitAll(
             solatDao.loadDailyPrayers(
-                zone.zoneId,
+                zoneEntity.zoneId,
                 todayYear = today.year,
                 tomorrowYear = tomorrow.year,
                 todayMonth = today.month,
@@ -113,8 +114,8 @@ class OfflineSolatRepository @Inject constructor(
                 if (prayerDetails.isNotEmpty()) {
                     prayerDetails.map {
                         Prayer(
-                            zoneId = zone.zoneId,
-                            zoneCode = zone.code,
+                            zoneId = zoneEntity.zoneId,
+                            zoneCode = zoneEntity.code,
                             year = it.year,
                             month = it.month,
                             day = it.day,
@@ -155,7 +156,7 @@ class OfflineSolatRepository @Inject constructor(
     override suspend fun deletePrayerByZone(zoneId: Int) =
         solatDao.deletePrayerDetailsByZoneId(zoneId)
 
-    private fun parsePrayerTimes(prayers: DailyPrayerDetails): Map<PrayerNames, Long> {
+    private fun parsePrayerTimes(prayers: DailyPrayerSummary): Map<PrayerNames, Long> {
         return mapOf(
             PrayerNames.FAJR to (prayers.fajr.toString() + "000").toLong(),
             PrayerNames.DHUHR to (prayers.dhuhr.toString() + "000").toLong(),

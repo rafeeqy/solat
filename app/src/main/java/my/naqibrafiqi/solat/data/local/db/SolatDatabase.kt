@@ -4,16 +4,16 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import my.naqibrafiqi.solat.data.local.dao.SolatDao
-import my.naqibrafiqi.solat.data.local.entity.PrayerDetails
-import my.naqibrafiqi.solat.data.local.entity.PrayerTime
-import my.naqibrafiqi.solat.data.local.entity.Zone
+import my.naqibrafiqi.solat.data.local.db.dao.SolatDao
+import my.naqibrafiqi.solat.data.local.db.entity.PrayerDetailsEntity
+import my.naqibrafiqi.solat.data.local.db.entity.PrayerTimeEntity
+import my.naqibrafiqi.solat.data.local.db.entity.ZoneEntity
 
 @Database(
     entities = [
-        Zone::class,
-        PrayerDetails::class,
-        PrayerTime::class
+        ZoneEntity::class,
+        PrayerDetailsEntity::class,
+        PrayerTimeEntity::class
     ],
     version = 1,
     exportSchema = true,
