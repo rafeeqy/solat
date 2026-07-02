@@ -6,7 +6,7 @@ import my.naqibrafiqi.solat.data.local.db.dao.SolatDao
 import my.naqibrafiqi.solat.data.local.db.entity.PrayerDetailsEntity
 import my.naqibrafiqi.solat.data.local.db.entity.PrayerTimeEntity
 import my.naqibrafiqi.solat.data.local.db.entity.ZoneEntity
-import my.naqibrafiqi.solat.data.local.datastore.PreferenceStorage
+import my.naqibrafiqi.solat.data.local.datastore.SolatDataStore
 import my.naqibrafiqi.solat.util.NextDayStatus
 import my.naqibrafiqi.solat.util.SolatDateTime
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +24,7 @@ import javax.inject.Inject
 class OfflineSolatRepository @Inject constructor(
     private val waktuSolatApiService: WaktuSolatApiService,
     private val solatDao: SolatDao,
-    private val dataStore: PreferenceStorage,
+    private val dataStore: SolatDataStore,
     private val workManager: WorkManager
 ) : SolatRepository {
     override suspend fun remoteFetchAllZones(): List<Long> {

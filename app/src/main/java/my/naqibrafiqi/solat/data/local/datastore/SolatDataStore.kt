@@ -1,19 +1,17 @@
 package my.naqibrafiqi.solat.data.local.datastore
 
 import kotlinx.coroutines.flow.Flow
+import my.naqibrafiqi.solat.domain.model.enums.ThemeSettings
 
-interface PreferenceStorage {
-    fun getCurrentZoneId(): Flow<Int>
+interface SolatDataStore {
 
-    suspend fun setCurrentZoneId(zoneId: Int)
+    fun getTheme(): Flow<ThemeSettings>
+
+    suspend fun setTheme(theme: ThemeSettings)
 
     fun getZoneCode(): Flow<String?>
 
     suspend fun setZoneCode(code: String)
-
-    fun getTheme(): Flow<String>
-
-    suspend fun setTheme(theme: String)
 
     fun getLocale(): Flow<String>
 
