@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
 
             SolatTheme(darkTheme = isDarkTheme) {
                 if (!mainViewModel.isLoading.value) {
-                    SolatApp(startDestination = OnboardingRoutes.WelcomeRoute)
+                    SolatApp(startDestination = mainViewModel.startDestination.value)
                 }
             }
         }

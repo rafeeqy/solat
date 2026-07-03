@@ -24,7 +24,7 @@ class PrayerTimeViewModel @Inject constructor(
     private val alarmSchedulerRepository: AlarmSchedulerRepository
 ) : ViewModel() {
 
-    private val _zoneId: MutableStateFlow<Int> = MutableStateFlow(0)
+    private val _zoneId: MutableStateFlow<Int> = MutableStateFlow(1)
 
     private val _zoneEntity: MutableStateFlow<ZoneEntity?> = MutableStateFlow(null)
     var zoneEntity: StateFlow<ZoneEntity?> = _zoneEntity.asStateFlow()
@@ -44,14 +44,10 @@ class PrayerTimeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(context = Dispatchers.IO) {
-            dataStore.getCurrentZoneId().collect { id ->
-                _zoneId.value = id
+            solatRepository.fetchZoneById(_zoneId.value).collect {
+                _zoneEntity.value = it
 
-                solatRepository.fetchZoneById(_zoneId.value).collect {
-                    _zoneEntity.value = it
-
-                    refresh()
-                }
+                refresh()
             }
         }
     }

@@ -21,23 +21,5 @@ class OnboardingViewModel @Inject constructor(
     private val dataStore: SolatDataStore,
     private val solatRepository: SolatRepository
 ) : ViewModel() {
-    val currentZoneId: StateFlow<Int> = dataStore.getCurrentZoneId()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = 0
-        )
 
-    private val _selectedZoneEntity: MutableStateFlow<ZoneEntity?> = MutableStateFlow(null)
-    val selectedZoneEntity: StateFlow<ZoneEntity?> = _selectedZoneEntity.asStateFlow()
-
-    init {
-        viewModelScope.launch(context = Dispatchers.IO) {
-            if (currentZoneId.value > 0) {
-                solatRepository.fetchZoneById(currentZoneId.value)
-                    .catch { _selectedZoneEntity.value = null }
-                    .collect { _selectedZoneEntity.value = it }
-            }
-        }
-    }
 }
