@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Refresh
@@ -20,11 +21,11 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun EmptyContent(
     message: String,
-    onRefresh: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRefresh: (() -> Unit)? = null,
 ) {
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -34,20 +35,25 @@ fun EmptyContent(
         ) {
             Text(
                 text = message,
-                fontWeight = FontWeight.Light,
+                color = MaterialTheme.colorScheme.tertiary,
+                fontWeight = FontWeight.Medium,
                 style = MaterialTheme.typography.titleLarge
             )
-            Button(onClick = onRefresh) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Refresh,
-                        contentDescription = "Refresh",
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Text(text = "Refresh")
+
+            if (onRefresh != null) {
+                Button(onClick = onRefresh) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Refresh,
+                            contentDescription = "Refresh",
+                            modifier = Modifier.size(20.dp)
+                        )
+
+                        Text(text = "Refresh")
+                    }
                 }
             }
         }

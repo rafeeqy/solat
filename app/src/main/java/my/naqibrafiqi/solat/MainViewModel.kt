@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import my.naqibrafiqi.solat.data.local.datastore.SolatDataStore
 import my.naqibrafiqi.solat.domain.model.enums.ThemeSettings
+import my.naqibrafiqi.solat.ui.navigation.route.OnboardingGraph
 import my.naqibrafiqi.solat.ui.navigation.route.OnboardingRoutes
+import my.naqibrafiqi.solat.ui.navigation.route.PrayerGraph
 import my.naqibrafiqi.solat.ui.navigation.route.PrayerRoutes
 import my.naqibrafiqi.solat.ui.navigation.route.SolatRoutes
 import javax.inject.Inject
@@ -24,7 +26,7 @@ class MainViewModel @Inject constructor(
     var isLoading = mutableStateOf(false)
         private set
 
-    var startDestination = mutableStateOf<SolatRoutes>(OnboardingRoutes.WelcomeRoute)
+    var startDestination = mutableStateOf<SolatRoutes>(OnboardingGraph)
         private set
 
     val theme: StateFlow<ThemeSettings> =
@@ -42,9 +44,9 @@ class MainViewModel @Inject constructor(
             val zoneCode = dataStore.getZoneCode().firstOrNull()
 
             startDestination.value = if (zoneCode == null) {
-                OnboardingRoutes.WelcomeRoute
+                OnboardingGraph
             } else {
-                PrayerRoutes.DailyPrayerRoute
+                PrayerGraph
             }
 
             isLoading.value = false

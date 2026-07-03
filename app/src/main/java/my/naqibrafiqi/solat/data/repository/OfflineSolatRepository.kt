@@ -2,23 +2,29 @@ package my.naqibrafiqi.solat.data.repository
 
 import android.util.Log
 import androidx.work.WorkManager
-import my.naqibrafiqi.solat.data.local.db.dao.SolatDao
-import my.naqibrafiqi.solat.data.local.db.entity.PrayerDetailsEntity
-import my.naqibrafiqi.solat.data.local.db.entity.PrayerTimeEntity
-import my.naqibrafiqi.solat.data.local.db.entity.ZoneEntity
-import my.naqibrafiqi.solat.data.local.datastore.SolatDataStore
-import my.naqibrafiqi.solat.util.NextDayStatus
-import my.naqibrafiqi.solat.util.SolatDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import my.naqibrafiqi.solat.data.local.datastore.SolatDataStore
+import my.naqibrafiqi.solat.data.local.db.dao.SolatDao
+import my.naqibrafiqi.solat.data.local.db.entity.PrayerDetailsEntity
+import my.naqibrafiqi.solat.data.local.db.entity.PrayerTimeEntity
+import my.naqibrafiqi.solat.data.local.db.entity.ZoneEntity
 import my.naqibrafiqi.solat.data.local.db.relationship.DailyPrayerSummary
+import my.naqibrafiqi.solat.data.mapper.toDomain
+import my.naqibrafiqi.solat.data.mapper.toEntity
 import my.naqibrafiqi.solat.data.remote.WaktuSolatApiService
+import my.naqibrafiqi.solat.data.remote.model.ZoneDto
+import my.naqibrafiqi.solat.domain.model.Zone
 import my.naqibrafiqi.solat.domain.repository.SolatRepository
+import my.naqibrafiqi.solat.util.NextDayStatus
+import my.naqibrafiqi.solat.util.SolatDateTime
+import my.naqibrafiqi.solat.util.states.Resource
 import javax.inject.Inject
 
 class OfflineSolatRepository @Inject constructor(
@@ -27,6 +33,35 @@ class OfflineSolatRepository @Inject constructor(
     private val dataStore: SolatDataStore,
     private val workManager: WorkManager
 ) : SolatRepository {
+
+    override fun fetchAllZones(): Flow<Resource<List<Zone>>> = flow {
+        emit(Resource.Loading)
+
+        // Fetch zones without subscription (with `first`)
+        // - just to check if the local zones is empty
+        val localZones = solatDao.loadAllZones().first()
+
+        if (localZones.isEmpty()) {
+            try {
+                // Fetch new zones from remote API and save to Room
+                val remoteZones = waktuSolatApiService.getAllZones()
+                val newZoneEntities = remoteZones.map(ZoneDto::toEntity)
+
+                solatDao.insertZones(zoneEntities = newZoneEntities)
+            } catch (e: Exception) {
+                emit(Resource.Error(e))
+            }
+        }
+
+        // Fetch zones with subscription (Flow)
+        // - zones to be emitted, whether the new zones are fetched or not
+        val zonesFlow = solatDao.loadAllZones()
+            .map { zones -> zones.map(ZoneEntity::toDomain) }
+            .map { zones -> Resource.Success(zones) }
+
+        emitAll(zonesFlow)
+    }
+
     override suspend fun remoteFetchAllZones(): List<Long> {
         val zones = waktuSolatApiService.getAllZones()
 
@@ -76,9 +111,6 @@ class OfflineSolatRepository @Inject constructor(
         )
     }
 
-    override fun fetchAllZones(): Flow<List<ZoneEntity>> =
-        solatDao.loadAllZones()
-
     override fun fetchZoneById(zoneId: Int): Flow<ZoneEntity?> {
         return if (zoneId > 0) solatDao.loadZoneById(zoneId) else flowOf(null)
     }
@@ -95,7 +127,12 @@ class OfflineSolatRepository @Inject constructor(
             solatDao.hasPrayerOnYearAndMonth(tomorrow.year, tomorrow.month) == null
         ) {
             try {
-                remoteFetchPrayerTimes(zoneEntity.zoneId, zoneEntity.code, tomorrow.year, tomorrow.month)
+                remoteFetchPrayerTimes(
+                    zoneEntity.zoneId,
+                    zoneEntity.code,
+                    tomorrow.year,
+                    tomorrow.month
+                )
             } catch (e: Exception) {
                 Log.e("FETCHDAILYPRAYERS", "Error: ${e.message}")
             }

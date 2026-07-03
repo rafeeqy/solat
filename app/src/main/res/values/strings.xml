@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">Solat</string>
+
+    <string name="welcome_title">Welcome to Solat</string>
+    <string name="welcome_title_description">Solat is an app to display and remind you of prayer times.</string>
+
+    <string name="zone_selection_title">Select prayer zone</string>
+
+    <string name="zone_selection_label_zone_code">Zone: %1$s</string>
+
+    <string name="onboarding_button_lets_get_started">Let\'s get started</string>
+    <string name="onboarding_button_finished_set_up">Finished set up</string>
+
+    <string name="common_loading_message">Fetching necessary data…</string>
+
+    <string name="common_results_no_zones">No zones</string>
 </resources>
