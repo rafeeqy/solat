@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "6038cae821e928ecf0766b53a19404e2",
+    "identityHash": "cf22361da6abc6a167b54f08ce820b1e",
     "entities": [
       {
         "tableName": "zones",
@@ -167,7 +167,7 @@
       },
       {
         "tableName": "prayer_times",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`prayer_time_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `prayer_details_id` INTEGER NOT NULL, `day` INTEGER NOT NULL, `hijri` TEXT NOT NULL, `fajr` INTEGER NOT NULL, `syuruk` INTEGER NOT NULL, `dhuhr` INTEGER NOT NULL, `asr` INTEGER NOT NULL, `maghrib` INTEGER NOT NULL, `isha` INTEGER NOT NULL, `created_date` INTEGER NOT NULL, `updated_date` INTEGER, `deleted_date` INTEGER, FOREIGN KEY(`prayer_details_id`) REFERENCES `prayer_details`(`prayer_details_id`) ON UPDATE RESTRICT ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`prayer_time_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `prayer_details_id` INTEGER NOT NULL, `day` INTEGER NOT NULL, `hijri` TEXT NOT NULL, `imsak` INTEGER NOT NULL, `fajr` INTEGER NOT NULL, `syuruk` INTEGER NOT NULL, `dhuha` INTEGER NOT NULL, `dhuhr` INTEGER NOT NULL, `asr` INTEGER NOT NULL, `maghrib` INTEGER NOT NULL, `isha` INTEGER NOT NULL, `created_date` INTEGER NOT NULL, `updated_date` INTEGER, `deleted_date` INTEGER, FOREIGN KEY(`prayer_details_id`) REFERENCES `prayer_details`(`prayer_details_id`) ON UPDATE RESTRICT ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "prayerTimeId",
@@ -194,6 +194,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "imsak",
+            "columnName": "imsak",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "fajr",
             "columnName": "fajr",
             "affinity": "INTEGER",
@@ -202,6 +208,12 @@
           {
             "fieldPath": "syuruk",
             "columnName": "syuruk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dhuha",
+            "columnName": "dhuha",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -290,7 +302,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6038cae821e928ecf0766b53a19404e2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cf22361da6abc6a167b54f08ce820b1e')"
     ]
   }
 }
