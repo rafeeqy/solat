@@ -33,8 +33,7 @@ fun NavGraphBuilder.settingsNavGraph(
                 snackbarManager = snackbarManager,
                 onNavigateBack = {
                     navController.popBackStack()
-                },
-                onNavigateToDailyPrayer = { /* TODO: Should be nullable */ }
+                }
             )
         }
     }

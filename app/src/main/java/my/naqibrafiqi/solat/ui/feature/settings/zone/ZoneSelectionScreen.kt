@@ -52,8 +52,8 @@ import my.naqibrafiqi.solat.util.states.UiEvent
 fun ZoneSelectionScreen(
     snackbarManager: SnackbarManager,
     onNavigateBack: () -> Unit,
-    onNavigateToDailyPrayer: () -> Unit,
     modifier: Modifier = Modifier,
+    onNavigateToDailyPrayer: (() -> Unit)? = null,
     viewModel: ZoneSelectionViewModel = hiltViewModel()
 ) {
     val currentZoneCode = viewModel.currentZoneCode.collectAsStateWithLifecycle().value
@@ -108,42 +108,44 @@ fun ZoneSelectionScreen(
         snackbarHost = {
             SnackbarHost(hostState = snackbarManager.snackbarState)
         },
-        bottomBar = {
-            Column(
-                modifier = Modifier
-                    .background(color = MaterialTheme.colorScheme.surface)
-                    .fillMaxWidth()
-                    .padding(
-                        start = 16.dp,
-                        top = 16.dp,
-                        end = 16.dp,
-                        bottom = 32.dp
-                    )
-            ) {
-                Button(
-                    onClick = onNavigateToDailyPrayer,
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = currentZoneCode != null
+        bottomBar = onNavigateToDailyPrayer?.let { toDailyPrayer ->
+            {
+                Column(
+                    modifier = Modifier
+                        .background(color = MaterialTheme.colorScheme.surface)
+                        .fillMaxWidth()
+                        .padding(
+                            start = 16.dp,
+                            top = 16.dp,
+                            end = 16.dp,
+                            bottom = 32.dp
+                        )
                 ) {
-                    Row(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    Button(
+                        onClick = toDailyPrayer,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = currentZoneCode != null
                     ) {
-                        Text(
-                            text = stringResource(id = R.string.onboarding_button_finished_set_up),
-                            fontWeight = FontWeight.Medium,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                        Row(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.onboarding_button_finished_set_up),
+                                fontWeight = FontWeight.Medium,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
 
-                        Icon(
-                            imageVector = Icons.Rounded.Check,
-                            contentDescription = "Check"
-                        )
+                            Icon(
+                                imageVector = Icons.Rounded.Check,
+                                contentDescription = "Check"
+                            )
+                        }
                     }
                 }
             }
-        }
+        } ?: {}
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
