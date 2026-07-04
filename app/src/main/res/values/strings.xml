@@ -6,7 +6,17 @@
 
     <string name="zone_selection_title">Select prayer zone</string>
 
+    <string name="common_label_unknown_zone">Unknown zone</string>
+    <string name="common_label_unknown_district">Unknown district</string>
+    <string name="common_label_unknown_prayer">---</string>
+    <string name="common_label_unknown_prayer_time">-:--</string>
+
     <string name="zone_selection_label_zone_code">Zone: %1$s</string>
+
+    <string name="prayer_label_hours">Hours</string>
+    <string name="prayer_label_minutes">Minutes</string>
+    <string name="prayer_label_seconds">Seconds</string>
+    <string name="prayer_label_next_prayer">Next prayer</string>
 
     <string name="onboarding_button_lets_get_started">Let\'s get started</string>
     <string name="onboarding_button_finished_set_up">Finished set up</string>
@@ -14,4 +24,18 @@
     <string name="common_loading_message">Fetching necessary data…</string>
 
     <string name="common_results_no_zones">No zones</string>
+    <string name="common_results_no_prayers">No prayers</string>
+
+    <string name="common_locale_english">English</string>
+    <string name="common_locale_bahasa_melayu">Bahasa Melayu</string>
+    <string name="common_locale_jawi">Bahasa Melayu (Jawi)</string>
+
+    <string name="common_prayer_name_imsak">Imsak</string>
+    <string name="common_prayer_name_fajr">Subuh</string>
+    <string name="common_prayer_name_syuruk">Syuruk</string>
+    <string name="common_prayer_name_dhuha">Dhuha</string>
+    <string name="common_prayer_name_dhuhr">Zohor</string>
+    <string name="common_prayer_name_asr">Asar</string>
+    <string name="common_prayer_name_maghrib">Maghrib</string>
+    <string name="common_prayer_name_isha">Isyak</string>
 </resources>

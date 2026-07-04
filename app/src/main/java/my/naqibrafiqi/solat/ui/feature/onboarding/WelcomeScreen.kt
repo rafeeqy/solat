@@ -1,4 +1,4 @@
-package my.naqibrafiqi.solat.ui.feature.onboarding.welcome
+package my.naqibrafiqi.solat.ui.feature.onboarding
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -3,6 +3,8 @@ package my.naqibrafiqi.solat.ui.navigation.graph
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.navigation
+import my.naqibrafiqi.solat.ui.navigation.route.SettingsGraph
 import my.naqibrafiqi.solat.ui.navigation.route.SettingsRoutes
 import my.naqibrafiqi.solat.util.snackbar.SnackbarManager
 
@@ -11,11 +13,14 @@ fun NavGraphBuilder.settingsNavGraph(
     navController: NavHostController
 ) {
 
-    composable<SettingsRoutes.SettingsRoute> {
-        // TODO: SettingsScreen
-    }
+    navigation<SettingsGraph>(startDestination = SettingsRoutes.SettingsRoute) {
+        
+        composable<SettingsRoutes.SettingsRoute> {
+            // TODO: SettingsScreen
+        }
 
-    composable<SettingsRoutes.ZoneSelectionRoute> {
-        // TODO: ZoneSelectionScreen
+        composable<SettingsRoutes.ZoneSelectionRoute> {
+            // TODO: ZoneSelectionScreen
+        }
     }
 }

@@ -1,11 +1,9 @@
 package my.naqibrafiqi.solat.di
 
-import androidx.work.WorkManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import my.naqibrafiqi.solat.data.local.datastore.SolatDataStore
 import my.naqibrafiqi.solat.data.local.db.dao.SolatDao
 import my.naqibrafiqi.solat.data.remote.WaktuSolatApiService
 import my.naqibrafiqi.solat.data.repository.OfflineSolatRepository
@@ -20,10 +18,8 @@ object RepositoryModule {
     @Provides
     fun provideSolatRepository(
         waktuSolatApiService: WaktuSolatApiService,
-        solatDao: SolatDao,
-        dataStore: SolatDataStore,
-        workManager: WorkManager
+        solatDao: SolatDao
     ): SolatRepository {
-        return OfflineSolatRepository(waktuSolatApiService, solatDao, dataStore, workManager)
+        return OfflineSolatRepository(waktuSolatApiService, solatDao)
     }
 }

@@ -2,19 +2,21 @@ package my.naqibrafiqi.solat.util
 
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.chrono.HijrahChronology
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 object SolatDateTime {
-    fun nowEpochMilli(): Long {
-        return Instant.now().toEpochMilli()
-    }
 
-    fun tomorrowEpochMilli(): Long {
-        return Instant.now().plus(Duration.ofDays(1)).toEpochMilli()
+    fun fromEpochSecondToLocalTime(epochSecond: Long): LocalTime {
+        return Instant.ofEpochSecond(epochSecond)
+            .atZone(ZoneId.of("Asia/Kuala_Lumpur"))
+            .toLocalTime()
     }
 
     fun formatDate(
@@ -41,6 +43,24 @@ object SolatDateTime {
         val formattedDate = hijrahDate.format(formatter.withZone(ZoneId.systemDefault()))
 
         return formattedDate
+    }
+
+    fun formatLocalDate(date: LocalDate, format: String = "dd/MM/uuuu"): String {
+        return date.format(DateTimeFormatter.ofPattern(format, Locale.getDefault()))
+    }
+
+    fun formatLocalTime(time: LocalTime, format: String = "h:mm a"): String {
+        return time.format(DateTimeFormatter.ofPattern(format, Locale.getDefault()))
+    }
+
+    // TODO: The functions below are to be reviewed...
+
+    fun nowEpochMilli(): Long {
+        return Instant.now().toEpochMilli()
+    }
+
+    fun tomorrowEpochMilli(): Long {
+        return Instant.now().plus(Duration.ofDays(1)).toEpochMilli()
     }
 
     fun splitDate(epochMilli: Long): ExtractedDateTime {

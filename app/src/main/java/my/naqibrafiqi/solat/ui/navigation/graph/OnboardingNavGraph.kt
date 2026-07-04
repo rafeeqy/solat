@@ -4,7 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import my.naqibrafiqi.solat.ui.feature.onboarding.welcome.WelcomeScreen
+import my.naqibrafiqi.solat.ui.feature.onboarding.WelcomeScreen
 import my.naqibrafiqi.solat.ui.feature.settings.zone.ZoneSelectionScreen
 import my.naqibrafiqi.solat.ui.navigation.route.OnboardingGraph
 import my.naqibrafiqi.solat.ui.navigation.route.OnboardingRoutes
