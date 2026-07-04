@@ -14,7 +14,6 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import my.naqibrafiqi.solat.domain.model.enums.ThemeSettings
-import my.naqibrafiqi.solat.ui.navigation.route.OnboardingRoutes
 import my.naqibrafiqi.solat.ui.theme.SolatTheme
 
 @AndroidEntryPoint
