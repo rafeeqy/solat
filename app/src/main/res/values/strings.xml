@@ -4,6 +4,10 @@
     <string name="welcome_title">Welcome to Solat</string>
     <string name="welcome_title_description">Solat is an app to display and remind you of prayer times.</string>
 
+    <string name="settings_title_settings">Settings</string>
+    <string name="settings_dialog_title_theme">Theme</string>
+    <string name="settings_dialog_title_language">Language</string>
+
     <string name="zone_selection_title">Select prayer zone</string>
 
     <string name="common_label_unknown_zone">Unknown zone</string>
@@ -11,12 +15,23 @@
     <string name="common_label_unknown_prayer">---</string>
     <string name="common_label_unknown_prayer_time">-:--</string>
 
+    <string name="settings_label_location">Location</string>
+    <string name="settings_label_location_description">Select your zone location</string>
+    <string name="settings_label_theme">Theme</string>
+    <string name="settings_label_theme_description">Select app theme</string>
+    <string name="settings_label_locale">Language</string>
+    <string name="settings_label_locale_description">Select app locale</string>
+    <string name="settings_label_notification">Notification</string>
+    <string name="settings_label_notification_description">Manage notification settings</string>
+
     <string name="zone_selection_label_zone_code">Zone: %1$s</string>
 
     <string name="prayer_label_hours">Hours</string>
     <string name="prayer_label_minutes">Minutes</string>
     <string name="prayer_label_seconds">Seconds</string>
-    <string name="prayer_label_next_prayer">Next prayer</string>
+    <string name="prayer_label_today_prayer">Today\'s prayers</string>
+
+    <string name="common_button_cancel">Cancel</string>
 
     <string name="onboarding_button_lets_get_started">Let\'s get started</string>
     <string name="onboarding_button_finished_set_up">Finished set up</string>
@@ -25,6 +40,10 @@
 
     <string name="common_results_no_zones">No zones</string>
     <string name="common_results_no_prayers">No prayers</string>
+
+    <string name="common_theme_system">Follow system</string>
+    <string name="common_theme_light">Light mode</string>
+    <string name="common_theme_dark">Dark mode</string>
 
     <string name="common_locale_english">English</string>
     <string name="common_locale_bahasa_melayu">Bahasa Melayu</string>
