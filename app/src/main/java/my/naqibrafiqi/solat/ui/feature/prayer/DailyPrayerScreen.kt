@@ -363,7 +363,7 @@ private fun PrayerTimeCard(
         Column(modifier = Modifier.padding(horizontal = 8.dp)) {
             Row {
                 Text(
-                    text = stringResource(id = R.string.prayer_label_next_prayer),
+                    text = stringResource(id = R.string.prayer_label_today_prayer),
                     fontWeight = FontWeight.SemiBold
                 )
             }

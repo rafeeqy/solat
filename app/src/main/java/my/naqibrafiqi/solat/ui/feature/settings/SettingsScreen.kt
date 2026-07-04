@@ -33,15 +33,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import my.naqibrafiqi.solat.BuildConfig
 import my.naqibrafiqi.solat.R
+import my.naqibrafiqi.solat.domain.model.enums.AppLanguage
+import my.naqibrafiqi.solat.domain.model.enums.ThemeSettings
 import my.naqibrafiqi.solat.ui.component.SelectionDialog
 import my.naqibrafiqi.solat.ui.component.SelectionDialogItem
 import my.naqibrafiqi.solat.ui.theme.SolatTheme
@@ -51,17 +56,23 @@ import my.naqibrafiqi.solat.ui.theme.SolatTheme
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToZoneLocation: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    var openThemeSelection by remember { mutableStateOf(false) }
+    val zone = viewModel.zone.collectAsStateWithLifecycle().value
 
-    var openLanguageSelection by remember { mutableStateOf(false) }
+    val versionName = BuildConfig.VERSION_NAME
+    val buildTime = BuildConfig.BUILD_TIME.lowercase()
+
+    var showTheme by remember { mutableStateOf(false) }
+
+    var showLocale by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(text = "Settings") },
+                title = { Text(text = stringResource(id = R.string.settings_title_settings)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -81,126 +92,75 @@ fun SettingsScreen(
             ) {
                 // Location
                 item {
-                    ListItem(
-                        headlineContent = { Text(text = "Location") },
-                        modifier = Modifier.clickable(
-                            enabled = true,
-                            role = Role.DropdownList,
-                            onClick = onNavigateToZoneLocation
-                        ),
-                        supportingContent = { Text(text = "Set location based on JAKIM zones") },
-                        leadingContent = {
-                            Icon(
-                                imageVector = Icons.Rounded.LocationOn,
-                                contentDescription = "Location on"
-                            )
+                    SettingsItem(
+                        title = stringResource(id = R.string.settings_label_location),
+                        subtitle = if (zone == null) {
+                            stringResource(id = R.string.common_label_unknown_zone)
+                        } else {
+                            "${zone.state} (${zone.code}): ${zone.district}"
                         },
-                        trailingContent = {
-                            Icon(
-                                imageVector = Icons.Rounded.ChevronRight,
-                                contentDescription = "Chevron right"
-                            )
-                        }
+                        icon = Icons.Rounded.LocationOn,
+                        onClick = onNavigateToZoneLocation,
+                        navigationIndicator = true
                     )
                 }
+
                 // App theme
                 item {
-                    ListItem(
-                        headlineContent = { Text(text = "Theme") },
-                        modifier = Modifier.clickable(
-                            enabled = true,
-                            role = Role.DropdownList,
-                            onClick = { openThemeSelection = true }
-                        ),
-                        supportingContent = {
-                            Text(
-                                text = buildAnnotatedString {
-                                    append("Current theme: ")
-                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                        append("System")
-                                    }
-                                }
-                            )
-                        },
-                        leadingContent = {
-                            Icon(
-                                imageVector = Icons.Rounded.Palette,
-                                contentDescription = "Palette"
-                            )
-                        }
+                    SettingsItem(
+                        title = stringResource(id = R.string.settings_label_theme),
+                        subtitle = stringResource(id = ThemeSettings.SYSTEM.resId),
+                        icon = Icons.Rounded.Palette,
+                        onClick = { showTheme = true }
                     )
                 }
+
                 // App locale
                 item {
-                    ListItem(
-                        headlineContent = { Text(text = "Language") },
-                        modifier = Modifier.clickable(
-                            enabled = true,
-                            role = Role.DropdownList,
-                            onClick = { openLanguageSelection = true }
-                        ),
-                        supportingContent = {
-                            Text(
-                                text = buildAnnotatedString {
-                                    append("Current language: ")
-                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                        append("English")
-                                    }
-                                }
-                            )
-                        },
-                        leadingContent = {
-                            Icon(
-                                imageVector = Icons.Rounded.Language,
-                                contentDescription = "Language"
-                            )
-                        }
+                    SettingsItem(
+                        title = stringResource(id = R.string.settings_label_locale),
+                        subtitle = stringResource(id = AppLanguage.ENGLISH.resId),
+                        icon = Icons.Rounded.Language,
+                        onClick = { showLocale = true }
                     )
                 }
+
                 // Notification
                 item {
-                    ListItem(
-                        headlineContent = { Text(text = "Notification") },
-                        modifier = Modifier.clickable(
-                            enabled = true,
-                            role = Role.DropdownList,
-                            onClick = { /* TODO: Navigate to system notification setting screen */ }
-                        ),
-                        supportingContent = { Text(text = "Manage notification preferences") },
-                        leadingContent = {
-                            Icon(
-                                imageVector = Icons.Rounded.Notifications,
-                                contentDescription = "Notifications"
-                            )
-                        },
-                        trailingContent = {
-                            Icon(
-                                imageVector = Icons.Rounded.ChevronRight,
-                                contentDescription = "Chevron right"
-                            )
-                        }
+                    SettingsItem(
+                        title = stringResource(id = R.string.settings_label_notification),
+                        subtitle = stringResource(id = R.string.settings_label_notification_description),
+                        icon = Icons.Rounded.Notifications,
+                        onClick = { /* TODO: Navigate to system notification settings screen */ },
+                        navigationIndicator = true
                     )
                 }
             }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp),
+                    .padding(
+                        top = 16.dp,
+                        bottom = 32.dp
+                    ),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "Solat",
+                        text = stringResource(id = R.string.app_name),
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.labelLarge
                     )
+
                     Text(
-                        text = "v0.0.6 (2025-12-25 14:21:00)",
+                        text = "v$versionName ($buildTime)",
                         color = MaterialTheme.colorScheme.secondary,
                         style = MaterialTheme.typography.labelMedium
                     )
                 }
+
                 Row {
                     IconButton(onClick = { /* TODO: Open github repo */ }) {
                         Image(
@@ -214,65 +174,96 @@ fun SettingsScreen(
         }
     }
 
-    if (openThemeSelection) {
+    // Theme selection dialog
+    if (showTheme) {
         SelectionDialog(
-            title = "Theme",
-            selectedItem = SelectionDialogItem(
-                id = 1,
-                value = "system",
-                label = "System"
-            ), // TODO: Current theme
-            selectionItems = listOf(
+            title = stringResource(id = R.string.settings_dialog_title_theme),
+            selectedItem = ThemeSettings.SYSTEM, // TODO: Current theme
+            selectionItems = ThemeSettings.entries.map { theme ->
                 SelectionDialogItem(
-                    id = 1,
-                    value = "system",
-                    label = "System"
-                ),
-                SelectionDialogItem(
-                    id = 2,
-                    value = "light",
-                    label = "Light"
-                ),
-                SelectionDialogItem(
-                    id = 3,
-                    value = "dark",
-                    label = "Dark"
+                    id = 0,
+                    value = theme,
+                    label = stringResource(id = theme.resId)
                 )
-            ), // TODO: Theme selection list
-            onDismiss = { openThemeSelection = false },
-            onSelect = { /* TODO: Update theme */ }
+            },
+            onDismiss = { showTheme = false },
+            onSelect = { theme ->
+                showTheme = false
+                /* TODO: Update theme */
+            }
         )
     }
 
-    if (openLanguageSelection) {
+    // Language selection dialog
+    if (showLocale) {
         SelectionDialog(
-            title = "Language",
-            selectedItem = SelectionDialogItem(
-                id = 1,
-                value = "eng",
-                label = "English"
-            ), // TODO: Current language
-            selectionItems = listOf(
+            title = stringResource(id = R.string.settings_dialog_title_language),
+            selectedItem = AppLanguage.ENGLISH, // TODO: Current language
+            selectionItems = AppLanguage.entries.map { lang ->
                 SelectionDialogItem(
-                    id = 1,
-                    value = "eng",
-                    label = "English"
-                ),
-                SelectionDialogItem(
-                    id = 2,
-                    value = "my",
-                    label = "Malay"
-                ),
-                SelectionDialogItem(
-                    id = 3,
-                    value = "my-jw",
-                    label = "Malay (Jawi)"
+                    id = 0,
+                    value = lang,
+                    label = stringResource(id = lang.resId)
                 )
-            ), // TODO: Language selection list
-            onDismiss = { openLanguageSelection = false },
-            onSelect = { /* TODO: Update language */ }
+            },
+            onDismiss = { showLocale = false },
+            onSelect = { lang ->
+                showLocale = false
+                /* TODO: Update language */
+            }
         )
     }
+}
+
+@Composable
+private fun SettingsItem(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    navigationIndicator: Boolean = false
+) {
+    ListItem(
+        headlineContent = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        },
+        modifier = modifier.clickable(
+            enabled = true,
+            role = Role.DropdownList,
+            onClick = onClick
+        ),
+        supportingContent = {
+            Text(
+                text = subtitle,
+                fontWeight = FontWeight.SemiBold,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                style = MaterialTheme.typography.labelLarge
+            )
+        },
+        leadingContent = {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        trailingContent = if (navigationIndicator) {
+            {
+                Icon(
+                    imageVector = Icons.Rounded.ChevronRight,
+                    contentDescription = "Chevron right"
+                )
+            }
+        } else {
+            null
+        }
+    )
 }
 
 @Preview(showBackground = true)
