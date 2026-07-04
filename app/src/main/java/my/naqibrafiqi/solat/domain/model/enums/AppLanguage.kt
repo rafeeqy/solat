@@ -3,19 +3,19 @@ package my.naqibrafiqi.solat.domain.model.enums
 import my.naqibrafiqi.solat.R
 
 enum class AppLanguage(
-    val label: String,
+    val langCode: String,
     val resId: Int
 ) {
     ENGLISH(
-        label = "English",
+        langCode = "en",
         resId = R.string.common_locale_english
     ),
     MALAY(
-        label = "Bahasa Melayu",
+        langCode = "ms",
         resId = R.string.common_locale_bahasa_melayu
     ),
     JAWI(
-        label = "Bahasa Melayu (Jawi)",
+        langCode = "ms-MY",
         resId = R.string.common_locale_jawi
     )
 }

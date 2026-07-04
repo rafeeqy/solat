@@ -19,6 +19,7 @@ fun NavGraphBuilder.settingsNavGraph(
 
         composable<SettingsRoutes.SettingsRoute> {
             SettingsScreen(
+                snackbarManager = snackbarManager,
                 onNavigateBack = {
                     navController.popBackStack()
                 },

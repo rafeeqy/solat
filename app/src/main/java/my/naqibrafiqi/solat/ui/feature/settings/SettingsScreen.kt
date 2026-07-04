@@ -24,9 +24,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +41,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -49,17 +50,21 @@ import my.naqibrafiqi.solat.domain.model.enums.AppLanguage
 import my.naqibrafiqi.solat.domain.model.enums.ThemeSettings
 import my.naqibrafiqi.solat.ui.component.SelectionDialog
 import my.naqibrafiqi.solat.ui.component.SelectionDialogItem
-import my.naqibrafiqi.solat.ui.theme.SolatTheme
+import my.naqibrafiqi.solat.util.snackbar.SnackbarManager
+import my.naqibrafiqi.solat.util.states.UiEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    snackbarManager: SnackbarManager,
     onNavigateBack: () -> Unit,
     onNavigateToZoneLocation: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val zone = viewModel.zone.collectAsStateWithLifecycle().value
+    val theme = viewModel.theme.collectAsStateWithLifecycle().value
+    val locale = viewModel.getLocale()
 
     val versionName = BuildConfig.VERSION_NAME
     val buildTime = BuildConfig.BUILD_TIME.lowercase()
@@ -67,6 +72,24 @@ fun SettingsScreen(
     var showTheme by remember { mutableStateOf(false) }
 
     var showLocale by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is UiEvent.Error -> {
+                    snackbarManager.showSnackbar(message = event.errorMessage)
+                }
+
+                is UiEvent.Loading -> {
+                    // NOTE: Do nothing...
+                }
+
+                is UiEvent.Success<*> -> {
+                    snackbarManager.showSnackbar(message = event.message)
+                }
+            }
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -82,6 +105,9 @@ fun SettingsScreen(
                     }
                 }
             )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarManager.snackbarState)
         }
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize()) {
@@ -109,7 +135,7 @@ fun SettingsScreen(
                 item {
                     SettingsItem(
                         title = stringResource(id = R.string.settings_label_theme),
-                        subtitle = stringResource(id = ThemeSettings.SYSTEM.resId),
+                        subtitle = stringResource(id = theme.resId),
                         icon = Icons.Rounded.Palette,
                         onClick = { showTheme = true }
                     )
@@ -119,7 +145,7 @@ fun SettingsScreen(
                 item {
                     SettingsItem(
                         title = stringResource(id = R.string.settings_label_locale),
-                        subtitle = stringResource(id = AppLanguage.ENGLISH.resId),
+                        subtitle = stringResource(id = locale.resId),
                         icon = Icons.Rounded.Language,
                         onClick = { showLocale = true }
                     )
@@ -178,7 +204,7 @@ fun SettingsScreen(
     if (showTheme) {
         SelectionDialog(
             title = stringResource(id = R.string.settings_dialog_title_theme),
-            selectedItem = ThemeSettings.SYSTEM, // TODO: Current theme
+            selectedItem = theme,
             selectionItems = ThemeSettings.entries.map { theme ->
                 SelectionDialogItem(
                     id = 0,
@@ -189,7 +215,7 @@ fun SettingsScreen(
             onDismiss = { showTheme = false },
             onSelect = { theme ->
                 showTheme = false
-                /* TODO: Update theme */
+                viewModel.updateTheme(theme.value)
             }
         )
     }
@@ -198,7 +224,7 @@ fun SettingsScreen(
     if (showLocale) {
         SelectionDialog(
             title = stringResource(id = R.string.settings_dialog_title_language),
-            selectedItem = AppLanguage.ENGLISH, // TODO: Current language
+            selectedItem = locale,
             selectionItems = AppLanguage.entries.map { lang ->
                 SelectionDialogItem(
                     id = 0,
@@ -209,7 +235,7 @@ fun SettingsScreen(
             onDismiss = { showLocale = false },
             onSelect = { lang ->
                 showLocale = false
-                /* TODO: Update language */
+                viewModel.updateLocale(lang.value)
             }
         )
     }
@@ -264,15 +290,4 @@ private fun SettingsItem(
             null
         }
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SettingsScreenPreview() {
-    SolatTheme {
-        SettingsScreen(
-            onNavigateBack = {},
-            onNavigateToZoneLocation = {}
-        )
-    }
 }

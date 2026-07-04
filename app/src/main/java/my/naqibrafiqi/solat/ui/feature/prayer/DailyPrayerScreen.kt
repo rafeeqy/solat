@@ -190,7 +190,7 @@ private fun DateButton(
                     date = SolatDateTime.nowEpochMilli(),
                     format = "d MMMM uuuu"
                 ),
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -231,7 +231,7 @@ private fun ZoneLocationButton(
 
             Text(
                 text = district,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 style = MaterialTheme.typography.labelSmall
