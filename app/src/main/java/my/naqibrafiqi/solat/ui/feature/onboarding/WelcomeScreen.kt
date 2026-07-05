@@ -28,7 +28,7 @@ import my.naqibrafiqi.solat.ui.theme.SolatTheme
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun WelcomeScreen(
-    onNavigateToZoneSelection: () -> Unit,
+    onNavigateToPermission: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(modifier = modifier) { innerPadding ->
@@ -75,7 +75,7 @@ fun WelcomeScreen(
                 verticalArrangement = Arrangement.spacedBy(40.dp)
             ) {
                 Button(
-                    onClick = onNavigateToZoneSelection,
+                    onClick = onNavigateToPermission,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -104,6 +104,6 @@ fun WelcomeScreen(
 @Composable
 private fun WelcomeScreenPreview() {
     SolatTheme {
-        WelcomeScreen(onNavigateToZoneSelection = {})
+        WelcomeScreen(onNavigateToPermission = {})
     }
 }

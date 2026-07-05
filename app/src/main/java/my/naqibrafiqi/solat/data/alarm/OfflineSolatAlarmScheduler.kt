@@ -25,6 +25,7 @@ class OfflineSolatAlarmScheduler @Inject constructor(
             .atZone(ZoneId.systemDefault())
             .toLocalTime()
             .format(DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault()))
+            .lowercase()
 
         val intent =
             Intent(context, SolatAlarmReceiver::class.java).apply {

@@ -12,5 +12,8 @@ sealed interface OnboardingRoutes : SolatRoutes {
     data object WelcomeRoute : OnboardingRoutes
 
     @Serializable
+    data object PermissionRoute : OnboardingRoutes
+
+    @Serializable
     data object ZoneSelectionRoute : OnboardingRoutes
 }

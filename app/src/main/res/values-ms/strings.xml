@@ -5,6 +5,9 @@
     <string name="welcome_title">Selamat Datang ke Solat</string>
     <string name="welcome_title_description">Aplikasi Solat bertujuan untuk mempamerkan dan memberi peringatan waktu solat.</string>
 
+    <string name="permission_title">Kebenaran aplikasi</string>
+    <string name="permission_title_description">Untuk memastikan anda tidak terlepas waktu solat, sila benarkan kebenaran ini bagi menerima makluman yang tepat dan pada masa yang sesuai.</string>
+
     <string name="settings_title_settings">Tetapan</string>
     <string name="settings_dialog_title_theme">Tema</string>
     <string name="settings_dialog_title_language">Bahasa</string>
@@ -15,6 +18,11 @@
     <string name="common_label_unknown_district">Daerah tidak diketahui</string>
     <string name="common_label_unknown_prayer">---</string>
     <string name="common_label_unknown_prayer_time">-:--</string>
+
+    <string name="permission_label_enable_notifications">Aktifkan notifikasi</string>
+    <string name="permission_label_enable_notifications_description">Dapatkan peringatan mesra tepat pada waktu solat.</string>
+    <string name="permission_label_enable_alarm">Aktifkan penggera &amp; peringatan</string>
+    <string name="permission_label_enable_alarm_description">Dapatkan makluman Azan berakurasi tinggi tepat pada waktunya.</string>
 
     <string name="settings_label_location">Zon waktu solat</string>
     <string name="settings_label_location_description">Pilih zon waktu solat</string>
@@ -35,6 +43,7 @@
     <string name="common_button_cancel">Batal</string>
 
     <string name="onboarding_button_lets_get_started">Ayuh mulakan</string>
+    <string name="onboarding_button_select_zone_location">Pilih lokasi zon</string>
     <string name="onboarding_button_finished_set_up">Selesai</string>
 
     <string name="common_loading_message">Mendapatkan maklumat yang diperlukan…</string>

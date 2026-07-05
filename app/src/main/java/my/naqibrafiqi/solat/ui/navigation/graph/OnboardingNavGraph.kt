@@ -4,6 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import my.naqibrafiqi.solat.ui.feature.onboarding.PermissionScreen
 import my.naqibrafiqi.solat.ui.feature.onboarding.WelcomeScreen
 import my.naqibrafiqi.solat.ui.feature.settings.zone.ZoneSelectionScreen
 import my.naqibrafiqi.solat.ui.navigation.route.OnboardingGraph
@@ -20,6 +21,18 @@ fun NavGraphBuilder.onboardingNavGraph(
 
         composable<OnboardingRoutes.WelcomeRoute> {
             WelcomeScreen(
+                onNavigateToPermission = {
+                    navController.navigate(route = OnboardingRoutes.PermissionRoute)
+                }
+            )
+        }
+
+        composable<OnboardingRoutes.PermissionRoute> {
+            PermissionScreen(
+                snackbarManager = snackbarManager,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
                 onNavigateToZoneSelection = {
                     navController.navigate(route = OnboardingRoutes.ZoneSelectionRoute)
                 }
