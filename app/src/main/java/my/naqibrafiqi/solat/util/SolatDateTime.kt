@@ -1,17 +1,22 @@
 package my.naqibrafiqi.solat.util
 
-import java.time.Duration
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringArrayResource
+import my.naqibrafiqi.solat.R
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
-import java.time.chrono.HijrahChronology
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoField
 import java.util.Locale
 
 object SolatDateTime {
+
+    fun nowEpochMilli(): Long {
+        return Instant.now().toEpochMilli()
+    }
 
     fun fromEpochSecondToLocalTime(epochSecond: Long): LocalTime {
         return Instant.ofEpochSecond(epochSecond)
@@ -19,95 +24,71 @@ object SolatDateTime {
             .toLocalTime()
     }
 
-    fun formatDate(
-        date: Long,
-        format: String = "EEEE, dd MMMM uuuu"
-    ): String {
-        val instant = Instant.ofEpochMilli(date)
+    /**
+     * Format [date] (Epoch milliseconds) to Gregorian date of format `DDDD, D MMMM YYYY`, e.g. **Jumaat, 4 July 2026**
+     *
+     * @param date Epoch milliseconds
+     * @return Gregorian date of format `DDDD, D MMMM YYYY`
+     */
+    @Composable
+    fun formatToFullDate(date: Long): String {
+        val months = stringArrayResource(id = R.array.months)
+        val days = stringArrayResource(id = R.array.days_of_week)
 
-        val formatter = DateTimeFormatter.ofPattern(format).withZone(ZoneId.systemDefault())
+        val localDate = Instant.ofEpochMilli(date)
+            .atZone(ZoneId.of("Asia/Kuala_Lumpur"))
+            .toLocalDate()
 
-        return formatter.format(instant)
+        val monthName = months[localDate.monthValue - 1]
+        val dayName = days[localDate.dayOfWeek.value - 1]
+
+        return "$dayName, ${localDate.dayOfMonth} $monthName ${localDate.year}"
     }
 
-    fun formatHijrahDate(
-        date: Long,
-        format: String = "EEEE, dd MMMM uuuu"
-    ): String {
-        val instant = Instant.ofEpochMilli(date)
-        val zonedDateTime = instant.atZone(ZoneId.systemDefault())
+    /**
+     * Format [date] (Epoch milliseconds) to Hijri date of format `D MMMM YYYY`, e.g. **19 Muharram 1448**
+     *
+     * @param date Epoch milliseconds
+     * @return Hijri date of format `D MMMM YYYY`
+     */
+    @Composable
+    fun formatToHijrahDate(date: Long): String {
+        val hijriMonths = stringArrayResource(id = R.array.hijri_months)
 
-        val hijrahDate: HijrahDate = HijrahChronology.INSTANCE.date(zonedDateTime)
+        val localDate = Instant.ofEpochMilli(date)
+            .atZone(ZoneId.of("Asia/Kuala_Lumpur"))
+            .toLocalDate()
 
-        val formatter = DateTimeFormatter.ofPattern(format)
-        val formattedDate = hijrahDate.format(formatter.withZone(ZoneId.systemDefault()))
+        val hijriDate = HijrahDate.from(localDate)
 
-        return formattedDate
+        val hDay = hijriDate.get(ChronoField.DAY_OF_MONTH)
+        val hMonth = hijriMonths[hijriDate.get(ChronoField.MONTH_OF_YEAR) - 1]
+        val hYear = hijriDate.get(ChronoField.YEAR_OF_ERA)
+
+        return "$hDay $hMonth $hYear"
     }
 
-    fun formatLocalDate(date: LocalDate, format: String = "dd/MM/uuuu"): String {
-        return date.format(DateTimeFormatter.ofPattern(format, Locale.getDefault()))
+    /**
+     * Format [date] ([LocalDate]) to Gregorian date of format `DDDD, DD/MM/YYYY`, e.g. **Friday, 04/07/2026**
+     *
+     * @param date [LocalDate]
+     * @return Gregorian date of format `DDDD, DD/MM/YYYY`
+     */
+    @Composable
+    fun formatLocalDate(date: LocalDate): String {
+        val days = stringArrayResource(id = R.array.days_of_week)
+
+        val dayName = days[date.dayOfWeek.value - 1]
+
+        val formattedDate = date.format(
+            DateTimeFormatter.ofPattern("dd/MM/uuuu")
+                .withZone(ZoneId.of("Asia/Kuala_Lumpur"))
+        )
+
+        return "$dayName, $formattedDate"
     }
 
     fun formatLocalTime(time: LocalTime, format: String = "h:mm a"): String {
         return time.format(DateTimeFormatter.ofPattern(format, Locale.getDefault()))
     }
-
-    // TODO: The functions below are to be reviewed...
-
-    fun nowEpochMilli(): Long {
-        return Instant.now().toEpochMilli()
-    }
-
-    fun tomorrowEpochMilli(): Long {
-        return Instant.now().plus(Duration.ofDays(1)).toEpochMilli()
-    }
-
-    fun splitDate(epochMilli: Long): ExtractedDateTime {
-        val split = formatDate(
-            date = epochMilli,
-            format = "uuuu-MM-dd-hh-HH-mm-ss-a"
-        ).split("-")
-
-        return ExtractedDateTime(
-            year = split[0].toInt(),
-            month = split[1].toInt(),
-            day = split[2].toInt(),
-            hour = split[3].toInt(),
-            hour24 = split[4].toInt(),
-            minute = split[5].toInt(),
-            second = split[6].toInt(),
-            isAfternoon = split[7] == "PM"
-        )
-    }
-
-    fun nextDayStatus(): NextDayStatus {
-        val instant = Instant.now()
-        val localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
-
-        val nextDay = localDateTime.plusDays(1)
-
-        return when {
-            nextDay.year > localDateTime.year -> NextDayStatus.NEXT_YEAR
-
-            nextDay.month > localDateTime.month -> NextDayStatus.NEXT_MONTH
-
-            else -> NextDayStatus.NO_CHANGES
-        }
-    }
-}
-
-data class ExtractedDateTime(
-    val year: Int,
-    val month: Int,
-    val day: Int,
-    val hour: Int,
-    val hour24: Int,
-    val minute: Int,
-    val second: Int,
-    val isAfternoon: Boolean
-)
-
-enum class NextDayStatus {
-    NO_CHANGES, NEXT_MONTH, NEXT_YEAR
 }

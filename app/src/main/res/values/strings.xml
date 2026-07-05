@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Solat</string>
 
@@ -47,7 +48,7 @@
 
     <string name="common_locale_english">English</string>
     <string name="common_locale_bahasa_melayu">Bahasa Melayu</string>
-    <string name="common_locale_jawi">Bahasa Melayu (Jawi)</string>
+    <string name="common_locale_jawi">بهاس ملايو (جاوي)</string>
 
     <string name="common_prayer_name_imsak">Imsak</string>
     <string name="common_prayer_name_fajr">Subuh</string>
@@ -57,4 +58,44 @@
     <string name="common_prayer_name_asr">Asar</string>
     <string name="common_prayer_name_maghrib">Maghrib</string>
     <string name="common_prayer_name_isha">Isyak</string>
+
+    <string-array name="months">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+
+    <string-array name="hijri_months">
+        <item>Muharram</item>
+        <item>Safar</item>
+        <item>Rabi Al-Awwal</item>
+        <item>Rahi Al-Thani</item>
+        <item>Jumada Al-Awwal</item>
+        <item>Jumada Al-Thani</item>
+        <item>Rajab</item>
+        <item>Sha\'ban</item>
+        <item>Ramadan</item>
+        <item>Shawwal</item>
+        <item>Dhul Qadah</item>
+        <item>Dhul Hijjah</item>
+    </string-array>
+
+    <string-array name="days_of_week">
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+        <item>Sunday</item>
+    </string-array>
 </resources>

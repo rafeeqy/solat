@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Solat</string>
+
+    <string name="welcome_title">Selamat Datang ke Solat</string>
+    <string name="welcome_title_description">Aplikasi Solat bertujuan untuk mempamerkan dan memberi peringatan waktu solat.</string>
+
+    <string name="settings_title_settings">Tetapan</string>
+    <string name="settings_dialog_title_theme">Tema</string>
+    <string name="settings_dialog_title_language">Bahasa</string>
+
+    <string name="zone_selection_title">Pilih zon waktu solat</string>
+
+    <string name="common_label_unknown_zone">Zon tidak diketahui</string>
+    <string name="common_label_unknown_district">Daerah tidak diketahui</string>
+    <string name="common_label_unknown_prayer">---</string>
+    <string name="common_label_unknown_prayer_time">-:--</string>
+
+    <string name="settings_label_location">Zon waktu solat</string>
+    <string name="settings_label_location_description">Pilih zon waktu solat</string>
+    <string name="settings_label_theme">Tema</string>
+    <string name="settings_label_theme_description">Pilih tema aplikasi</string>
+    <string name="settings_label_locale">Bahasa</string>
+    <string name="settings_label_locale_description">Pilih penempatan aplikasi</string>
+    <string name="settings_label_notification">Notifikasi</string>
+    <string name="settings_label_notification_description">Urus tetapan notifikasi</string>
+
+    <string name="zone_selection_label_zone_code">Zon: %1$s</string>
+
+    <string name="prayer_label_hours">Jam</string>
+    <string name="prayer_label_minutes">Minit</string>
+    <string name="prayer_label_seconds">Saat</string>
+    <string name="prayer_label_today_prayer">Waktu solat hari ini</string>
+
+    <string name="common_button_cancel">Batal</string>
+
+    <string name="onboarding_button_lets_get_started">Ayuh mulakan</string>
+    <string name="onboarding_button_finished_set_up">Selesai</string>
+
+    <string name="common_loading_message">Mendapatkan maklumat yang diperlukan…</string>
+
+    <string name="common_results_no_zones">Tiada zon</string>
+    <string name="common_results_no_prayers">Tiada waktu solat</string>
+
+    <string name="common_theme_system">Ikut sistem</string>
+    <string name="common_theme_light">Mod cahaya</string>
+    <string name="common_theme_dark">Mod gelap</string>
+
+    <string name="common_locale_english">English</string>
+    <string name="common_locale_bahasa_melayu">Bahasa Melayu</string>
+    <string name="common_locale_jawi">بهاس ملايو (جاوي)</string>
+
+    <string name="common_prayer_name_imsak">Imsak</string>
+    <string name="common_prayer_name_fajr">Subuh</string>
+    <string name="common_prayer_name_syuruk">Syuruk</string>
+    <string name="common_prayer_name_dhuha">Dhuha</string>
+    <string name="common_prayer_name_dhuhr">Zohor</string>
+    <string name="common_prayer_name_asr">Asar</string>
+    <string name="common_prayer_name_maghrib">Maghrib</string>
+    <string name="common_prayer_name_isha">Isyak</string>
+
+    <string-array name="months">
+        <item>Januari</item>
+        <item>Februari</item>
+        <item>Mac</item>
+        <item>April</item>
+        <item>Mei</item>
+        <item>Jun</item>
+        <item>Julai</item>
+        <item>Ogos</item>
+        <item>September</item>
+        <item>Oktober</item>
+        <item>November</item>
+        <item>Disember</item>
+    </string-array>
+
+    <string-array name="hijri_months">
+        <item>Muharram</item>
+        <item>Safar</item>
+        <item>Rabiulawal</item>
+        <item>Rabiulakhir</item>
+        <item>Jamadilawal</item>
+        <item>Jamadilakhir</item>
+        <item>Rejab</item>
+        <item>Syaaban</item>
+        <item>Ramadan</item>
+        <item>Syawal</item>
+        <item>Zulkaedah</item>
+        <item>Zulhijah</item>
+    </string-array>
+
+    <string-array name="days_of_week">
+        <item>Isnin</item>
+        <item>Selasa</item>
+        <item>Rabu</item>
+        <item>Khamis</item>
+        <item>Jumaat</item>
+        <item>Sabtu</item>
+        <item>Ahad</item>
+    </string-array>
+</resources>

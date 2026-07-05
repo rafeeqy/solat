@@ -34,9 +34,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -47,6 +50,7 @@ import my.naqibrafiqi.solat.domain.model.PrayerTime
 import my.naqibrafiqi.solat.domain.model.enums.PrayerName
 import my.naqibrafiqi.solat.ui.component.EmptyContent
 import my.naqibrafiqi.solat.util.SolatDateTime
+import my.naqibrafiqi.solat.util.converter.toJawiNumerals
 import my.naqibrafiqi.solat.util.snackbar.SnackbarManager
 import java.time.LocalTime
 
@@ -65,6 +69,8 @@ fun DailyPrayerScreen(
 
     val countdownText = viewModel.countdownText.collectAsStateWithLifecycle().value
     val nextPrayer = viewModel.nextPrayer.collectAsStateWithLifecycle().value
+
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     Scaffold(
         modifier = modifier,
@@ -111,7 +117,7 @@ fun DailyPrayerScreen(
                 ) {
                     Column(
                         modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(32.dp)
+                        verticalArrangement = Arrangement.spacedBy(if (isRtl) 8.dp else 32.dp)
                     ) {
                         // Date and Location buttons
                         Column(
@@ -167,6 +173,11 @@ fun DailyPrayerScreen(
 private fun DateButton(
     modifier: Modifier = Modifier
 ) {
+    val todayDate = SolatDateTime.formatToFullDate(date = SolatDateTime.nowEpochMilli())
+    val todayHijriDate = SolatDateTime.formatToHijrahDate(date = SolatDateTime.nowEpochMilli())
+
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+
     TextButton(
         onClick = { /* NOTE: Do nothing for now... */ },
         modifier = modifier,
@@ -177,21 +188,15 @@ private fun DateButton(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = SolatDateTime.formatDate(
-                    date = SolatDateTime.nowEpochMilli(),
-                    format = "EEEE, d MMMM uuuu"
-                ),
+                text = if (isRtl) todayDate.toJawiNumerals() else todayDate,
                 fontWeight = FontWeight.SemiBold,
-                style = MaterialTheme.typography.bodyLarge
+                style = if (isRtl) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge
             )
 
             Text(
-                text = SolatDateTime.formatHijrahDate(
-                    date = SolatDateTime.nowEpochMilli(),
-                    format = "d MMMM uuuu"
-                ),
+                text = if (isRtl) todayHijriDate.toJawiNumerals() else todayHijriDate,
                 fontWeight = FontWeight.Medium,
-                style = MaterialTheme.typography.bodyMedium
+                style = if (isRtl) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium
             )
         }
     }
@@ -225,7 +230,7 @@ private fun ZoneLocationButton(
                 Text(
                     text = stateZone,
                     fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.labelLarge.copy(textDirection = TextDirection.Ltr)
                 )
             }
 
@@ -234,7 +239,7 @@ private fun ZoneLocationButton(
                 fontWeight = FontWeight.Medium,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
-                style = MaterialTheme.typography.labelSmall
+                style = MaterialTheme.typography.labelSmall.copy(textDirection = TextDirection.Ltr)
             )
         }
     }
@@ -245,6 +250,8 @@ private fun NextPrayer(
     prayer: PrayerTime?,
     modifier: Modifier = Modifier
 ) {
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -261,12 +268,15 @@ private fun NextPrayer(
 
         Text(
             text = if (prayer != null) {
-                SolatDateTime.formatLocalTime(time = prayer.time).lowercase()
+                val time = SolatDateTime.formatLocalTime(time = prayer.time).lowercase()
+
+                if (isRtl) time.toJawiNumerals() else time
             } else {
                 stringResource(id = R.string.common_label_unknown_prayer_time)
             },
             fontSize = 40.sp,
             fontWeight = FontWeight.Normal,
+            style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Ltr)
         )
     }
 }
@@ -284,11 +294,16 @@ private fun NextPrayerCountdown(
         stringResource(id = R.string.prayer_label_seconds) to splitCountdown[2]
     )
 
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         tempData.entries.forEachIndexed { index, entry ->
+            val label = entry.key
+            val count = entry.value.padStart(2, '0')
+
             Surface(
                 modifier = Modifier.widthIn(max = 80.dp),
                 shape = RoundedCornerShape(16.dp),
@@ -301,15 +316,15 @@ private fun NextPrayerCountdown(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = entry.value.padStart(2, '0'),
+                        text = if (isRtl) count.toJawiNumerals() else count,
                         fontWeight = FontWeight.Medium,
                         style = MaterialTheme.typography.displaySmall
                     )
 
                     Text(
-                        text = entry.key,
+                        text = label,
                         fontWeight = FontWeight.Normal,
-                        style = MaterialTheme.typography.labelLarge
+                        style = if (isRtl) MaterialTheme.typography.titleLarge else MaterialTheme.typography.labelLarge
                     )
                 }
             }
@@ -351,6 +366,10 @@ private fun PrayerTimeCard(
             currentPrayers.count()
         }
 
+    val formattedDate = SolatDateTime.formatLocalDate(date = prayerDate)
+
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -369,12 +388,9 @@ private fun PrayerTimeCard(
             }
 
             Text(
-                text = SolatDateTime.formatLocalDate(
-                    date = prayerDate,
-                    format = "EEEE, dd/MM/uuuu"
-                ),
+                text = if (isRtl) formattedDate.toJawiNumerals() else formattedDate,
                 fontWeight = FontWeight.Normal,
-                style = MaterialTheme.typography.labelLarge
+                style = if (isRtl) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.labelLarge
             )
         }
 
@@ -388,6 +404,8 @@ private fun PrayerTimeCard(
             itemSpacing = 8.dp
         ) { index ->
             val prayerTime = currentPrayers[index]
+
+            val time = SolatDateTime.formatLocalTime(time = prayerTime.time).lowercase()
 
             Surface(
                 modifier = Modifier
@@ -410,14 +428,13 @@ private fun PrayerTimeCard(
                         Text(
                             text = stringResource(id = prayerTime.prayer.resId),
                             fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.bodyLarge
+                            style = if (isRtl) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge
                         )
 
                         Text(
-                            text =
-                                SolatDateTime.formatLocalTime(time = prayerTime.time).lowercase(),
+                            text = if (isRtl) time.toJawiNumerals() else time,
                             fontWeight = FontWeight.SemiBold,
-                            style = MaterialTheme.typography.labelLarge
+                            style = if (isRtl) MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Ltr) else MaterialTheme.typography.labelLarge
                         )
                     }
                 }

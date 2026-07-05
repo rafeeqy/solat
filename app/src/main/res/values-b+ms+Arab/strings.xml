@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">صلاة</string>
+
+    <string name="welcome_title">سلامت داتڠ ك صلاة</string>
+    <string name="welcome_title_description">اڤليكاسي صلاة برتوجوان اونتوق ممڤاميركن دان ممبري ڤريڠتن وقتو صلاة.</string>
+
+    <string name="settings_title_settings">تتڤن</string>
+    <string name="settings_dialog_title_theme">تيما</string>
+    <string name="settings_dialog_title_language">بهاس</string>
+
+    <string name="zone_selection_title">ڤيليه زون وقتو صلاة</string>
+
+    <string name="common_label_unknown_zone">زون تيدق دكتاهوءي</string>
+    <string name="common_label_unknown_district">دايره تيدق دكتاهوءي</string>
+    <string name="common_label_unknown_prayer">---</string>
+    <string name="common_label_unknown_prayer_time">-:--</string>
+
+    <string name="settings_label_location">زون وقتو صلاة</string>
+    <string name="settings_label_location_description">ڤيليه زون وقتو صلاة</string>
+    <string name="settings_label_theme">تيما</string>
+    <string name="settings_label_theme_description">ڤيليه تيما اڤليكاسي</string>
+    <string name="settings_label_locale">بهاس</string>
+    <string name="settings_label_locale_description">ڤيليه ڤنمڤتن اڤليكاسي</string>
+    <string name="settings_label_notification">نوتيفيكاسي</string>
+    <string name="settings_label_notification_description">اوروس تتڤن نوتيفيكاسي</string>
+
+    <string name="zone_selection_label_zone_code">زون: %1$s</string>
+
+    <string name="prayer_label_hours">جم</string>
+    <string name="prayer_label_minutes">مينيت</string>
+    <string name="prayer_label_seconds">ساعت</string>
+    <string name="prayer_label_today_prayer">وقتو صلاة هاري اين</string>
+
+    <string name="common_button_cancel">باتل</string>
+
+    <string name="onboarding_button_lets_get_started">ايوه مولاكن</string>
+    <string name="onboarding_button_finished_set_up">سلساي</string>
+
+    <string name="common_loading_message">منداڤتكن معلومت يڠ دڤرلوكن…</string>
+
+    <string name="common_results_no_zones">تياد زون</string>
+    <string name="common_results_no_prayers">تياد وقتو صلاة</string>
+
+    <string name="common_theme_system">ايكوت سيستم</string>
+    <string name="common_theme_light">مود چهاي</string>
+    <string name="common_theme_dark">مود ڬلڤ</string>
+
+    <string name="common_locale_english">English</string>
+    <string name="common_locale_bahasa_melayu">Bahasa Melayu</string>
+    <string name="common_locale_jawi">بهاس ملايو (جاوي)</string>
+
+    <string name="common_prayer_name_imsak">امسق</string>
+    <string name="common_prayer_name_fajr">صبح</string>
+    <string name="common_prayer_name_syuruk">شروق</string>
+    <string name="common_prayer_name_dhuha">ضحى</string>
+    <string name="common_prayer_name_dhuhr">ظهر</string>
+    <string name="common_prayer_name_asr">عصر</string>
+    <string name="common_prayer_name_maghrib">مغرب</string>
+    <string name="common_prayer_name_isha">عشاء</string>
+
+    <string-array name="months">
+        <item>جانواري</item>
+        <item>فيبرواري</item>
+        <item>مچ</item>
+        <item>اڤريل</item>
+        <item>مي</item>
+        <item>جون</item>
+        <item>جولاي</item>
+        <item>اوݢوس</item>
+        <item>سيڤتيمبر</item>
+        <item>اوکتوبر</item>
+        <item>نوۏيمبر</item>
+        <item>ديسيمبر</item>
+    </string-array>
+
+    <string-array name="hijri_months">
+        <item>محرّم</item>
+        <item>صفر</item>
+        <item>ربيع الأول</item>
+        <item>ربيع الآخر</item>
+        <item>جمادى الأولى</item>
+        <item>جمادى الآخرة</item>
+        <item>رجب</item>
+        <item>شعبان</item>
+        <item>رمضان</item>
+        <item>شوال</item>
+        <item>ذو القعدة</item>
+        <item>ذو الحجة</item>
+    </string-array>
+
+    <string-array name="days_of_week">
+        <item>اثنين</item>
+        <item>ثلاثاء</item>
+        <item>رابو</item>
+        <item>خميس</item>
+        <item>جمعة</item>
+        <item>سبتو</item>
+        <item>احد</item>
+    </string-array>
+</resources>
