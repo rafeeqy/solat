@@ -23,10 +23,12 @@ interface SolatDao {
     suspend fun insertPrayerTimes(prayerTimeEntities: List<PrayerTimeEntity>): List<Long>
 
     @Query(
-        value = "DELETE FROM prayer_details " +
-                "WHERE zone_id = :zoneId"
+        value = """
+            DELETE FROM prayer_details 
+            WHERE year = :year AND month_number = :month
+        """
     )
-    suspend fun deletePrayerDetailsByZoneId(zoneId: Int)
+    suspend fun deleteAllPastPrayerTimes(year: Int, month: Int): Int
 
     @Query(
         value = """
