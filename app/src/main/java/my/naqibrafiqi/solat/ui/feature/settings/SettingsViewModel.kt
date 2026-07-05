@@ -88,8 +88,12 @@ class SettingsViewModel @Inject constructor(
         val currentLocales = AppCompatDelegate.getApplicationLocales()
 
         return if (!currentLocales.isEmpty) {
-            currentLocales[0]?.language?.let { lang ->
-                AppLanguage.entries.find { it.langCode == lang }
+            currentLocales[0]?.toLanguageTag()?.let { fullTag ->
+                when {
+                    fullTag.contains("Arab") -> AppLanguage.JAWI
+                    fullTag.startsWith("ms") -> AppLanguage.MALAY
+                    else -> AppLanguage.ENGLISH
+                }
             } ?: AppLanguage.ENGLISH
         } else {
             AppLanguage.ENGLISH

@@ -16,7 +16,9 @@ val provider = GoogleFont.Provider(
 
 val MontserratFont = GoogleFont("Montserrat")
 
-val MontserratFontFamily = FontFamily(
+val AmiriFont = GoogleFont("Amiri")
+
+val MontserratWithAmiriFontFamily = FontFamily(
     // Normal
     Font(
         googleFont = MontserratFont,
@@ -35,7 +37,13 @@ val MontserratFontFamily = FontFamily(
     ),
     Font(
         googleFont = MontserratFont,
-        fontProvider = provider
+        fontProvider = provider,
+        weight = FontWeight.Normal
+    ),
+    Font(
+        googleFont = AmiriFont,
+        fontProvider = provider,
+        weight = FontWeight.Normal
     ),
     Font(
         googleFont = MontserratFont,
@@ -49,6 +57,11 @@ val MontserratFontFamily = FontFamily(
     ),
     Font(
         googleFont = MontserratFont,
+        fontProvider = provider,
+        weight = FontWeight.Bold
+    ),
+    Font(
+        googleFont = AmiriFont,
         fontProvider = provider,
         weight = FontWeight.Bold
     ),
@@ -84,6 +97,13 @@ val MontserratFontFamily = FontFamily(
     Font(
         googleFont = MontserratFont,
         fontProvider = provider,
+        weight = FontWeight.Normal,
+        style = FontStyle.Italic
+    ),
+    Font(
+        googleFont = AmiriFont,
+        fontProvider = provider,
+        weight = FontWeight.Normal,
         style = FontStyle.Italic
     ),
     Font(
@@ -105,6 +125,12 @@ val MontserratFontFamily = FontFamily(
         style = FontStyle.Italic
     ),
     Font(
+        googleFont = AmiriFont,
+        fontProvider = provider,
+        weight = FontWeight.Bold,
+        style = FontStyle.Italic
+    ),
+    Font(
         googleFont = MontserratFont,
         fontProvider = provider,
         weight = FontWeight.ExtraBold,
@@ -115,25 +141,25 @@ val MontserratFontFamily = FontFamily(
         fontProvider = provider,
         weight = FontWeight.Black,
         style = FontStyle.Italic
-    ),
+    )
 )
 
 val baseline = Typography()
 
 val Typography = Typography(
-    displayLarge = baseline.displayLarge.copy(fontFamily = MontserratFontFamily),
-    displayMedium = baseline.displayMedium.copy(fontFamily = MontserratFontFamily),
-    displaySmall = baseline.displaySmall.copy(fontFamily = MontserratFontFamily),
-    headlineLarge = baseline.headlineLarge.copy(fontFamily = MontserratFontFamily),
-    headlineMedium = baseline.headlineMedium.copy(fontFamily = MontserratFontFamily),
-    headlineSmall = baseline.headlineSmall.copy(fontFamily = MontserratFontFamily),
-    titleLarge = baseline.titleLarge.copy(fontFamily = MontserratFontFamily),
-    titleMedium = baseline.titleMedium.copy(fontFamily = MontserratFontFamily),
-    titleSmall = baseline.titleSmall.copy(fontFamily = MontserratFontFamily),
-    bodyLarge = baseline.bodyLarge.copy(fontFamily = MontserratFontFamily),
-    bodyMedium = baseline.bodyMedium.copy(fontFamily = MontserratFontFamily),
-    bodySmall = baseline.bodySmall.copy(fontFamily = MontserratFontFamily),
-    labelLarge = baseline.labelLarge.copy(fontFamily = MontserratFontFamily),
-    labelMedium = baseline.labelMedium.copy(fontFamily = MontserratFontFamily),
-    labelSmall = baseline.labelSmall.copy(fontFamily = MontserratFontFamily)
+    displayLarge = baseline.displayLarge.copy(fontFamily = MontserratWithAmiriFontFamily),
+    displayMedium = baseline.displayMedium.copy(fontFamily = MontserratWithAmiriFontFamily),
+    displaySmall = baseline.displaySmall.copy(fontFamily = MontserratWithAmiriFontFamily),
+    headlineLarge = baseline.headlineLarge.copy(fontFamily = MontserratWithAmiriFontFamily),
+    headlineMedium = baseline.headlineMedium.copy(fontFamily = MontserratWithAmiriFontFamily),
+    headlineSmall = baseline.headlineSmall.copy(fontFamily = MontserratWithAmiriFontFamily),
+    titleLarge = baseline.titleLarge.copy(fontFamily = MontserratWithAmiriFontFamily),
+    titleMedium = baseline.titleMedium.copy(fontFamily = MontserratWithAmiriFontFamily),
+    titleSmall = baseline.titleSmall.copy(fontFamily = MontserratWithAmiriFontFamily),
+    bodyLarge = baseline.bodyLarge.copy(fontFamily = MontserratWithAmiriFontFamily),
+    bodyMedium = baseline.bodyMedium.copy(fontFamily = MontserratWithAmiriFontFamily),
+    bodySmall = baseline.bodySmall.copy(fontFamily = MontserratWithAmiriFontFamily),
+    labelLarge = baseline.labelLarge.copy(fontFamily = MontserratWithAmiriFontFamily),
+    labelMedium = baseline.labelMedium.copy(fontFamily = MontserratWithAmiriFontFamily),
+    labelSmall = baseline.labelSmall.copy(fontFamily = MontserratWithAmiriFontFamily)
 )

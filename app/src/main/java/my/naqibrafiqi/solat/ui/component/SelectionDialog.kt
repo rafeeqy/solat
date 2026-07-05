@@ -18,10 +18,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -43,6 +45,8 @@ fun <T> SelectionDialog(
     onSelect: (SelectionDialogItem<T>) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -60,14 +64,17 @@ fun <T> SelectionDialog(
                 Text(
                     text = title,
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    style = MaterialTheme.typography.titleLarge
+                    style = if (isRtl) MaterialTheme.typography.headlineLarge else MaterialTheme.typography.titleLarge
                 )
 
                 Column(modifier = Modifier.selectableGroup()) {
                     selectionItems.forEach { item ->
                         ListItem(
                             headlineContent = {
-                                Text(text = item.label)
+                                Text(
+                                    text = item.label,
+                                    style = if (isRtl) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge
+                                )
                             },
                             modifier = Modifier.clickable(
                                 enabled = true,
@@ -98,7 +105,7 @@ fun <T> SelectionDialog(
                         Text(
                             text = stringResource(id = R.string.common_button_cancel),
                             fontWeight = FontWeight.SemiBold,
-                            style = MaterialTheme.typography.labelLarge
+                            style = if (isRtl) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.labelLarge
                         )
                     }
                 }

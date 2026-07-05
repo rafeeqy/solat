@@ -33,9 +33,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -63,6 +65,8 @@ fun ZoneSelectionScreen(
     val loading = uiState.isLoading
 
     val listState = rememberLazyListState()
+
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     LaunchedEffect(Unit) {
         launch {
@@ -94,7 +98,12 @@ fun ZoneSelectionScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(id = R.string.zone_selection_title)) },
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.zone_selection_title),
+                        style = if (isRtl) MaterialTheme.typography.headlineLarge else MaterialTheme.typography.titleLarge
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -134,7 +143,7 @@ fun ZoneSelectionScreen(
                             Text(
                                 text = stringResource(id = R.string.onboarding_button_finished_set_up),
                                 fontWeight = FontWeight.Medium,
-                                style = MaterialTheme.typography.bodyLarge
+                                style = if (isRtl) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge
                             )
 
                             Icon(
@@ -202,7 +211,8 @@ fun ZoneSelectionScreen(
                                     text = stringResource(
                                         id = R.string.zone_selection_label_zone_code,
                                         zone.code
-                                    )
+                                    ),
+                                    style = MaterialTheme.typography.bodyLarge
                                 )
                             },
                             modifier = Modifier.clickable(

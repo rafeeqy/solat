@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.LocationOn
@@ -36,11 +37,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -73,6 +76,8 @@ fun SettingsScreen(
 
     var showLocale by remember { mutableStateOf(false) }
 
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
             when (event) {
@@ -95,7 +100,12 @@ fun SettingsScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(id = R.string.settings_title_settings)) },
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.settings_title_settings),
+                        style = if (isRtl) MaterialTheme.typography.headlineLarge else MaterialTheme.typography.titleLarge
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -177,7 +187,7 @@ fun SettingsScreen(
                         text = stringResource(id = R.string.app_name),
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.labelLarge
+                        style = if (isRtl) MaterialTheme.typography.titleLarge else MaterialTheme.typography.labelLarge
                     )
 
                     Text(
@@ -250,11 +260,13 @@ private fun SettingsItem(
     modifier: Modifier = Modifier,
     navigationIndicator: Boolean = false
 ) {
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+
     ListItem(
         headlineContent = {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge
+                style = if (isRtl) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge
             )
         },
         modifier = modifier.clickable(
@@ -268,7 +280,7 @@ private fun SettingsItem(
                 fontWeight = FontWeight.SemiBold,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
-                style = MaterialTheme.typography.labelLarge
+                style = if (isRtl) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.labelLarge
             )
         },
         leadingContent = {
@@ -282,8 +294,8 @@ private fun SettingsItem(
         trailingContent = if (navigationIndicator) {
             {
                 Icon(
-                    imageVector = Icons.Rounded.ChevronRight,
-                    contentDescription = "Chevron right"
+                    imageVector = if (isRtl) Icons.Rounded.ChevronLeft else Icons.Rounded.ChevronRight,
+                    contentDescription = if (isRtl) "Chevron left" else "Chevron right"
                 )
             }
         } else {

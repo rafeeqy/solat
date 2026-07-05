@@ -1,5 +1,6 @@
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 plugins {
@@ -24,8 +25,9 @@ android {
         versionCode = 1
         versionName = "1.0.0"
 
-        val dateFormat = SimpleDateFormat("h:mm a, dd/MM/yyyy", Locale.getDefault())
-        val buildTime = dateFormat.format(Date())
+        val buildTime = LocalDateTime.now()
+            .atZone(ZoneId.of("Asia/Kuala_Lumpur"))
+            .format(DateTimeFormatter.ofPattern("h:mm a, hh/MM/uuuu"))
 
         buildConfigField("String", "BUILD_TIME", "\"$buildTime\"")
 

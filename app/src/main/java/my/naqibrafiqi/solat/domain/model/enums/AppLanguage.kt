@@ -15,7 +15,7 @@ enum class AppLanguage(
         resId = R.string.common_locale_bahasa_melayu
     ),
     JAWI(
-        langCode = "ms-MY",
+        langCode = "ms-Arab",
         resId = R.string.common_locale_jawi
     )
 }

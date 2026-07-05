@@ -148,7 +148,7 @@ class DailyPrayerViewModel @Inject constructor(
 
         return dailyPrayers.flatMap { dailyPrayer ->
             dailyPrayer.prayerTimes
-                .filter { it.prayer != PrayerName.IMSAK && it.prayer != PrayerName.SYURUK }
+                .filter { it.prayer != PrayerName.IMSAK && it.prayer != PrayerName.SYURUK && it.prayer != PrayerName.DHUHA }
                 .map { prayerTime ->
                     val dateTime = LocalDateTime.of(dailyPrayer.date, prayerTime.time)
                     Pair(prayerTime, dateTime)
