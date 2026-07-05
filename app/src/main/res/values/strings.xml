@@ -5,6 +5,9 @@
     <string name="welcome_title">Welcome to Solat</string>
     <string name="welcome_title_description">Solat is an app to display and remind you of prayer times.</string>
 
+    <string name="permission_title">Required permissions</string>
+    <string name="permission_title_description">To ensure you never miss a prayer, please allow these permissions to receive timely and accurate alerts.</string>
+
     <string name="settings_title_settings">Settings</string>
     <string name="settings_dialog_title_theme">Theme</string>
     <string name="settings_dialog_title_language">Language</string>
@@ -15,6 +18,11 @@
     <string name="common_label_unknown_district">Unknown district</string>
     <string name="common_label_unknown_prayer">---</string>
     <string name="common_label_unknown_prayer_time">-:--</string>
+
+    <string name="permission_label_enable_notifications">Enable notifications</string>
+    <string name="permission_label_enable_notifications_description">Receive gentle reminders as soon as it is time to pray.</string>
+    <string name="permission_label_enable_alarm">Enable alarm &amp; reminders</string>
+    <string name="permission_label_enable_alarm_description">Receive highly accurate Azan notifications exactly on time.</string>
 
     <string name="settings_label_location">Location</string>
     <string name="settings_label_location_description">Select your zone location</string>
@@ -35,6 +43,7 @@
     <string name="common_button_cancel">Cancel</string>
 
     <string name="onboarding_button_lets_get_started">Let\'s get started</string>
+    <string name="onboarding_button_select_zone_location">Select zone location</string>
     <string name="onboarding_button_finished_set_up">Finished set up</string>
 
     <string name="common_loading_message">Fetching necessary data…</string>
@@ -51,13 +60,13 @@
     <string name="common_locale_jawi">بهاس ملايو (جاوي)</string>
 
     <string name="common_prayer_name_imsak">Imsak</string>
-    <string name="common_prayer_name_fajr">Subuh</string>
+    <string name="common_prayer_name_fajr">Fajr</string>
     <string name="common_prayer_name_syuruk">Syuruk</string>
     <string name="common_prayer_name_dhuha">Dhuha</string>
-    <string name="common_prayer_name_dhuhr">Zohor</string>
-    <string name="common_prayer_name_asr">Asar</string>
+    <string name="common_prayer_name_dhuhr">Dhuhr</string>
+    <string name="common_prayer_name_asr">Asr</string>
     <string name="common_prayer_name_maghrib">Maghrib</string>
-    <string name="common_prayer_name_isha">Isyak</string>
+    <string name="common_prayer_name_isha">Isha</string>
 
     <string-array name="months">
         <item>January</item>
@@ -77,16 +86,16 @@
     <string-array name="hijri_months">
         <item>Muharram</item>
         <item>Safar</item>
-        <item>Rabi Al-Awwal</item>
-        <item>Rahi Al-Thani</item>
+        <item>Rabi\' Al-Awwal</item>
+        <item>Rabi\' Al-Thani</item>
         <item>Jumada Al-Awwal</item>
         <item>Jumada Al-Thani</item>
         <item>Rajab</item>
         <item>Sha\'ban</item>
         <item>Ramadan</item>
         <item>Shawwal</item>
-        <item>Dhul Qadah</item>
-        <item>Dhul Hijjah</item>
+        <item>Dhu Al-Qi\'dah</item>
+        <item>Dhu Al-Hijjah</item>
     </string-array>
 
     <string-array name="days_of_week">

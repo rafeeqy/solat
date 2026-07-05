@@ -5,6 +5,9 @@
     <string name="welcome_title">سلامت داتڠ ك صلاة</string>
     <string name="welcome_title_description">اڤليكاسي صلاة برتوجوان اونتوق ممڤاميركن دان ممبري ڤريڠتن وقتو صلاة.</string>
 
+    <string name="permission_title">کبنرن اڤليکاسي</string>
+    <string name="permission_title_description">اونتوق ممستيکن اندا تيدق ترلڤس وقتو صلاة، سيلا بنرکن کبنرن اين باݢي منريما معلومن يڠ تڤت دان ڤد ماس يڠ سسواي.</string>
+
     <string name="settings_title_settings">تتڤن</string>
     <string name="settings_dialog_title_theme">تيما</string>
     <string name="settings_dialog_title_language">بهاس</string>
@@ -15,6 +18,11 @@
     <string name="common_label_unknown_district">دايره تيدق دكتاهوءي</string>
     <string name="common_label_unknown_prayer">---</string>
     <string name="common_label_unknown_prayer_time">-:--</string>
+
+    <string name="permission_label_enable_notifications">اکتيفکن نوتيفيكاسي</string>
+    <string name="permission_label_enable_notifications_description">داڤتکن ڤرايڠتن مسرا تڤت ڤد وقتو صلاة.</string>
+    <string name="permission_label_enable_alarm">اکتيفکن ڤڠݢرا دان ڤرايڠتن</string>
+    <string name="permission_label_enable_alarm_description">داڤتکن معلومن اذان بيراكوراسي تيڠݢي تڤت ڤد وقتوڽ.</string>
 
     <string name="settings_label_location">زون وقتو صلاة</string>
     <string name="settings_label_location_description">ڤيليه زون وقتو صلاة</string>
@@ -35,6 +43,7 @@
     <string name="common_button_cancel">باتل</string>
 
     <string name="onboarding_button_lets_get_started">ايوه مولاكن</string>
+    <string name="onboarding_button_select_zone_location">ڤيليه لوکاسي زون</string>
     <string name="onboarding_button_finished_set_up">سلساي</string>
 
     <string name="common_loading_message">منداڤتكن معلومت يڠ دڤرلوكن…</string>
