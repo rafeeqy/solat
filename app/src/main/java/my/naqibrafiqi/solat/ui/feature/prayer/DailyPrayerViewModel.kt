@@ -28,6 +28,7 @@ import my.naqibrafiqi.solat.domain.model.PrayerTime
 import my.naqibrafiqi.solat.domain.model.Zone
 import my.naqibrafiqi.solat.domain.model.enums.PrayerName
 import my.naqibrafiqi.solat.domain.repository.SolatRepository
+import my.naqibrafiqi.solat.domain.usecase.ScheduleNextPrayersUseCase
 import my.naqibrafiqi.solat.util.states.Resource
 import java.time.Duration
 import java.time.LocalDate
@@ -39,7 +40,8 @@ import kotlin.time.Duration.Companion.milliseconds
 @HiltViewModel
 class DailyPrayerViewModel @Inject constructor(
     private val dataStore: SolatDataStore,
-    private val solatRepository: SolatRepository
+    private val solatRepository: SolatRepository,
+    private val scheduleNextPrayers: ScheduleNextPrayersUseCase
 ) : ViewModel() {
 
     private val _zoneCode: Flow<String?> =
@@ -113,6 +115,9 @@ class DailyPrayerViewModel @Inject constructor(
                     _countdownText.update { "--:--:--" }
                     return@collectLatest
                 }
+
+                // Schedule prayers notifications
+                scheduleNextPrayers(prayerDetails)
 
                 runCountdownLoop(dailyPrayers = prayerDetails)
             }
