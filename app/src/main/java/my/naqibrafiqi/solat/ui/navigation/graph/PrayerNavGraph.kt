@@ -3,6 +3,7 @@ package my.naqibrafiqi.solat.ui.navigation.graph
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import my.naqibrafiqi.solat.ui.feature.prayer.DailyPrayerScreen
 import my.naqibrafiqi.solat.ui.navigation.route.PrayerGraph
@@ -18,7 +19,13 @@ fun NavGraphBuilder.prayerNavGraph(
 
     navigation<PrayerGraph>(startDestination = PrayerRoutes.DailyPrayerRoute) {
 
-        composable<PrayerRoutes.DailyPrayerRoute> {
+        composable<PrayerRoutes.DailyPrayerRoute>(
+            deepLinks = listOf(
+                navDeepLink<PrayerRoutes.DailyPrayerRoute>(
+                    basePath = "solat://prayer/daily"
+                )
+            )
+        ) {
             DailyPrayerScreen(
                 snackbarManager = snackbarManager,
                 onNavigateToSettings = {

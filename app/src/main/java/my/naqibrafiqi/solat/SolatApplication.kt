@@ -8,6 +8,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import dagger.hilt.android.HiltAndroidApp
+import my.naqibrafiqi.solat.data.worker.DailyAlarmWorker
 import my.naqibrafiqi.solat.data.worker.PrayerTimeCleanupWorker
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -39,11 +40,23 @@ class SolatApplication : Application(), Configuration.Provider {
                 .setConstraints(constraints)
                 .build()
 
-        WorkManager.getInstance(this)
-            .enqueueUniquePeriodicWork(
-                "CleanPrayerTimeWork",
-                ExistingPeriodicWorkPolicy.KEEP,
-                cleanupWorkRequest
-            )
+        val dailyAlarmWorkRequest =
+            PeriodicWorkRequestBuilder<DailyAlarmWorker>(1, TimeUnit.DAYS)
+                .setConstraints(constraints)
+                .build()
+
+        val workManager = WorkManager.getInstance(this)
+
+        workManager.enqueueUniquePeriodicWork(
+            "CleanPrayerTimeWork",
+            ExistingPeriodicWorkPolicy.KEEP,
+            cleanupWorkRequest
+        )
+
+        workManager.enqueueUniquePeriodicWork(
+            "DailyPrayerAlarmWork",
+            ExistingPeriodicWorkPolicy.KEEP,
+            dailyAlarmWorkRequest
+        )
     }
 }
