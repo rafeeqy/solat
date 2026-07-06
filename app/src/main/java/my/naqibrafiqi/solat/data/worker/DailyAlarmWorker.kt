@@ -7,6 +7,7 @@ import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.firstOrNull
+import my.naqibrafiqi.solat.data.local.datastore.DataStoreManager
 import my.naqibrafiqi.solat.data.local.datastore.SolatDataStore
 import my.naqibrafiqi.solat.domain.repository.SolatRepository
 import my.naqibrafiqi.solat.domain.usecase.ScheduleNextPrayersUseCase
@@ -29,6 +30,8 @@ class DailyAlarmWorker @AssistedInject constructor(
             val zone =
                 solatRepository.fetchZoneByCode(zoneCode).firstOrNull() ?: return Result.failure()
 
+            val enabledPrayers = dataStore.getEnabledPrayers().firstOrNull() ?: DataStoreManager.DEFAULT_ENABLED_PRAYERS
+
             val prayerResource = solatRepository.fetchDailyPrayersForTodayAndTomorrow(
                 zoneId = zone.id,
                 zoneCode = zone.code,
@@ -42,7 +45,7 @@ class DailyAlarmWorker @AssistedInject constructor(
 
                 is Resource.Success -> {
                     if (prayerResource.data.isNotEmpty()) {
-                        scheduleNextPrayers(prayerResource.data)
+                        scheduleNextPrayers(prayerResource.data, enabledPrayers)
                         Result.success()
                     } else {
                         Result.retry()

@@ -14,6 +14,8 @@
 
     <string name="zone_selection_title">Pilih zon waktu solat</string>
 
+    <string name="notification_title_notification">Notifikasi</string>
+
     <string name="common_label_unknown_zone">Zon tidak diketahui</string>
     <string name="common_label_unknown_district">Daerah tidak diketahui</string>
     <string name="common_label_unknown_prayer">---</string>
@@ -34,6 +36,9 @@
     <string name="settings_label_notification_description">Urus tetapan notifikasi</string>
 
     <string name="zone_selection_label_zone_code">Zon: %1$s</string>
+
+    <string name="notification_label_permissions">Kebenaran</string>
+    <string name="notification_label_prayers_notification">Notifikasi waktu-waktu solat</string>
 
     <string name="prayer_label_hours">Jam</string>
     <string name="prayer_label_minutes">Minit</string>

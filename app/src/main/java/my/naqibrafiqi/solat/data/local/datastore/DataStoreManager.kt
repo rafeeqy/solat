@@ -5,13 +5,12 @@ import androidx.datastore.core.IOException
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
-import my.naqibrafiqi.solat.domain.model.enums.AppLanguage
+import my.naqibrafiqi.solat.domain.model.enums.PrayerName
 import my.naqibrafiqi.solat.domain.model.enums.ThemeSettings
 import javax.inject.Inject
 
@@ -19,11 +18,17 @@ class DataStoreManager @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) : SolatDataStore {
 
-    private object PreferencesKeys {
-        val THEME = stringPreferencesKey(name = "theme")
-        val ZONE_CODE = stringPreferencesKey(name = "zone_code")
-        val LOCALE = stringPreferencesKey(name = "locale") // TODO: To be removed
-        val ISYAK = longPreferencesKey(name = "isyak") // TODO: To be removed
+    companion object {
+        val THEME_KEY = stringPreferencesKey(name = "theme")
+        val ZONE_CODE_KEY = stringPreferencesKey(name = "zone_code")
+        val ENABLED_PRAYERS_KEY = stringSetPreferencesKey("enabled_prayers")
+        val DEFAULT_ENABLED_PRAYERS = setOf(
+            PrayerName.SUBUH.name,
+            PrayerName.ZOHOR.name,
+            PrayerName.ASAR.name,
+            PrayerName.MAGHRIB.name,
+            PrayerName.ISYAK.name
+        )
     }
 
     override fun getTheme(): Flow<ThemeSettings> {
@@ -34,7 +39,7 @@ class DataStoreManager @Inject constructor(
                 throw e
             }
         }.map { preferences ->
-            val themeName = preferences[PreferencesKeys.THEME] ?: ThemeSettings.SYSTEM.name
+            val themeName = preferences[THEME_KEY] ?: ThemeSettings.SYSTEM.name
 
             runCatching { ThemeSettings.valueOf(themeName) }
                 .getOrDefault(ThemeSettings.SYSTEM)
@@ -43,7 +48,7 @@ class DataStoreManager @Inject constructor(
 
     override suspend fun setTheme(theme: ThemeSettings) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.THEME] = theme.name
+            preferences[THEME_KEY] = theme.name
         }
     }
 
@@ -55,18 +60,17 @@ class DataStoreManager @Inject constructor(
                 throw e
             }
         }.map { preferences ->
-            preferences[PreferencesKeys.ZONE_CODE]
+            preferences[ZONE_CODE_KEY]
         }
     }
 
     override suspend fun setZoneCode(code: String) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.ZONE_CODE] = code
+            preferences[ZONE_CODE_KEY] = code
         }
     }
 
-    // TODO: To be removed
-    override fun getLocale(): Flow<String> {
+    override fun getEnabledPrayers(): Flow<Set<String>> {
         return dataStore.data.catch { e ->
             if (e is IOException) {
                 emit(emptyPreferences())
@@ -74,34 +78,25 @@ class DataStoreManager @Inject constructor(
                 throw e
             }
         }.map { preferences ->
-            preferences[PreferencesKeys.LOCALE] ?: AppLanguage.ENGLISH.name
+            preferences[ENABLED_PRAYERS_KEY] ?: DEFAULT_ENABLED_PRAYERS
         }
     }
 
-    // TODO: To be removed
-    override suspend fun setLocale(locale: String) {
+    override suspend fun togglePrayerNotification(
+        prayerName: String,
+        isEnabled: Boolean
+    ) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.LOCALE] = locale
-        }
-    }
+            val currentSet = preferences[ENABLED_PRAYERS_KEY] ?: DEFAULT_ENABLED_PRAYERS
+            val mutableSet = currentSet.toMutableSet()
 
-    // TODO: To be removed
-    override fun getPreviousIsyakPrayer(): Flow<Long?> {
-        return dataStore.data.catch { e ->
-            if (e is IOException) {
-                emit(emptyPreferences())
+            if (isEnabled) {
+                mutableSet.add(prayerName)
             } else {
-                throw e
+                mutableSet.remove(prayerName)
             }
-        }.map { preferences ->
-            preferences[PreferencesKeys.ISYAK]
-        }
-    }
 
-    // TODO: To be removed
-    override suspend fun setPreviousIsyakPrayer(isyakPrayer: Long) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.ISYAK] = isyakPrayer
+            preferences[ENABLED_PRAYERS_KEY] = mutableSet
         }
     }
 }

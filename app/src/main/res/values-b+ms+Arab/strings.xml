@@ -14,6 +14,8 @@
 
     <string name="zone_selection_title">ڤيليه زون وقتو صلاة</string>
 
+    <string name="notification_title_notification">نوتيفيكاسي</string>
+
     <string name="common_label_unknown_zone">زون تيدق دكتاهوءي</string>
     <string name="common_label_unknown_district">دايره تيدق دكتاهوءي</string>
     <string name="common_label_unknown_prayer">---</string>
@@ -34,6 +36,9 @@
     <string name="settings_label_notification_description">اوروس تتڤن نوتيفيكاسي</string>
 
     <string name="zone_selection_label_zone_code">زون: %1$s</string>
+
+    <string name="notification_label_permissions">کبنرن</string>
+    <string name="notification_label_prayers_notification">نوتيفيكاسي وقتو٢ صلاة</string>
 
     <string name="prayer_label_hours">جم</string>
     <string name="prayer_label_minutes">مينيت</string>

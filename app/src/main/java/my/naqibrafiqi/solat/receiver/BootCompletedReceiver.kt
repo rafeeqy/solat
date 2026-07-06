@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import my.naqibrafiqi.solat.data.local.datastore.DataStoreManager
 import my.naqibrafiqi.solat.data.local.datastore.SolatDataStore
 import my.naqibrafiqi.solat.domain.repository.SolatRepository
 import my.naqibrafiqi.solat.domain.usecase.ScheduleNextPrayersUseCase
@@ -41,6 +42,8 @@ class BootCompletedReceiver : BroadcastReceiver() {
             val zone =
                 solatRepository.fetchZoneByCode(zoneCode).firstOrNull() ?: return@launch
 
+            val enabledPrayers = dataStore.getEnabledPrayers().firstOrNull() ?: DataStoreManager.DEFAULT_ENABLED_PRAYERS
+
             val prayerResource = solatRepository.fetchDailyPrayersForTodayAndTomorrow(
                 zoneId = zone.id,
                 zoneCode = zone.code,
@@ -54,7 +57,7 @@ class BootCompletedReceiver : BroadcastReceiver() {
 
                 is Resource.Success -> {
                     if (prayerResource.data.isNotEmpty()) {
-                        scheduleNextPrayers(prayerResource.data)
+                        scheduleNextPrayers(prayerResource.data, enabledPrayers)
                     } else {
                         return@launch
                     }

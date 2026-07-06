@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import my.naqibrafiqi.solat.ui.feature.settings.SettingsScreen
+import my.naqibrafiqi.solat.ui.feature.settings.notification.NotificationScreen
 import my.naqibrafiqi.solat.ui.feature.settings.zone.ZoneSelectionScreen
 import my.naqibrafiqi.solat.ui.navigation.route.SettingsGraph
 import my.naqibrafiqi.solat.ui.navigation.route.SettingsRoutes
@@ -25,12 +26,24 @@ fun NavGraphBuilder.settingsNavGraph(
                 },
                 onNavigateToZoneLocation = {
                     navController.navigate(route = SettingsRoutes.ZoneSelectionRoute)
+                },
+                onNavigateToNotification = {
+                    navController.navigate(route = SettingsRoutes.NotificationRoute)
                 }
             )
         }
 
         composable<SettingsRoutes.ZoneSelectionRoute> {
             ZoneSelectionScreen(
+                snackbarManager = snackbarManager,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable<SettingsRoutes.NotificationRoute> {
+            NotificationScreen(
                 snackbarManager = snackbarManager,
                 onNavigateBack = {
                     navController.popBackStack()

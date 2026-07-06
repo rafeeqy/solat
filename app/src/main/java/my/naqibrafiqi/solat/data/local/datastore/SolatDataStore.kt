@@ -1,6 +1,7 @@
 package my.naqibrafiqi.solat.data.local.datastore
 
 import kotlinx.coroutines.flow.Flow
+import my.naqibrafiqi.solat.domain.model.enums.PrayerName
 import my.naqibrafiqi.solat.domain.model.enums.ThemeSettings
 
 interface SolatDataStore {
@@ -13,11 +14,7 @@ interface SolatDataStore {
 
     suspend fun setZoneCode(code: String)
 
-    fun getLocale(): Flow<String>
+    fun getEnabledPrayers(): Flow<Set<String>>
 
-    suspend fun setLocale(locale: String)
-
-    fun getPreviousIsyakPrayer(): Flow<Long?>
-
-    suspend fun setPreviousIsyakPrayer(isyakPrayer: Long)
+    suspend fun togglePrayerNotification(prayerName: String, isEnabled: Boolean)
 }

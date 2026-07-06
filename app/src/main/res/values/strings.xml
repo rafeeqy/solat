@@ -14,6 +14,8 @@
 
     <string name="zone_selection_title">Select prayer zone</string>
 
+    <string name="notification_title_notification">Notification</string>
+
     <string name="common_label_unknown_zone">Unknown zone</string>
     <string name="common_label_unknown_district">Unknown district</string>
     <string name="common_label_unknown_prayer">---</string>
@@ -34,6 +36,9 @@
     <string name="settings_label_notification_description">Manage notification settings</string>
 
     <string name="zone_selection_label_zone_code">Zone: %1$s</string>
+
+    <string name="notification_label_permissions">Permissions</string>
+    <string name="notification_label_prayers_notification">Prayer notifications</string>
 
     <string name="prayer_label_hours">Hours</string>
     <string name="prayer_label_minutes">Minutes</string>
