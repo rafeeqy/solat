@@ -62,6 +62,7 @@ fun SettingsScreen(
     snackbarManager: SnackbarManager,
     onNavigateBack: () -> Unit,
     onNavigateToZoneLocation: () -> Unit,
+    onNavigateToNotification: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -167,7 +168,7 @@ fun SettingsScreen(
                         title = stringResource(id = R.string.settings_label_notification),
                         subtitle = stringResource(id = R.string.settings_label_notification_description),
                         icon = Icons.Rounded.Notifications,
-                        onClick = { /* TODO: Navigate to system notification settings screen */ },
+                        onClick = onNavigateToNotification,
                         navigationIndicator = true
                     )
                 }

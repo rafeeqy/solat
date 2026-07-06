@@ -13,4 +13,7 @@ sealed interface SettingsRoutes : SolatRoutes {
 
     @Serializable
     data object ZoneSelectionRoute : SettingsRoutes
+
+    @Serializable
+    data object NotificationRoute : SettingsRoutes
 }

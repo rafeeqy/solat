@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import my.naqibrafiqi.solat.data.local.datastore.DataStoreManager
 import my.naqibrafiqi.solat.data.local.datastore.SolatDataStore
 import my.naqibrafiqi.solat.domain.model.DailyPrayer
 import my.naqibrafiqi.solat.domain.model.PrayerTime
@@ -116,8 +118,11 @@ class DailyPrayerViewModel @Inject constructor(
                     return@collectLatest
                 }
 
+                val enabledPrayers = dataStore.getEnabledPrayers().firstOrNull()
+                    ?: DataStoreManager.DEFAULT_ENABLED_PRAYERS
+
                 // Schedule prayers notifications
-                scheduleNextPrayers(prayerDetails)
+                scheduleNextPrayers(prayerDetails, enabledPrayers)
 
                 runCountdownLoop(dailyPrayers = prayerDetails)
             }

@@ -11,7 +11,7 @@ class ScheduleNextPrayersUseCase @Inject constructor(
     private val alarmScheduler: SolatAlarmScheduler
 ) {
 
-    operator fun invoke(dailyPrayers: List<DailyPrayer>) {
+    operator fun invoke(dailyPrayers: List<DailyPrayer>, enabledPrayers: Set<String>) {
         val now = LocalDateTime.now()
 
         val upcomingPrayers = dailyPrayers.asSequence().flatMap { dailyPrayer ->
@@ -29,18 +29,19 @@ class ScheduleNextPrayersUseCase @Inject constructor(
             .toList()
 
         upcomingPrayers.forEach { (prayerName, dateTime) ->
-            val triggerMillis =
-                dateTime.atZone(ZoneId.systemDefault())
+            val solatAlarmItem = SolatAlarmItem(
+                id = prayerName.ordinal,
+                prayerName = prayerName,
+                triggerAtMillis = dateTime.atZone(ZoneId.systemDefault())
                     .toInstant()
                     .toEpochMilli()
-
-            alarmScheduler.schedule(
-                SolatAlarmItem(
-                    id = prayerName.ordinal,
-                    prayerName = prayerName,
-                    triggerAtMillis = triggerMillis
-                )
             )
+
+            if (enabledPrayers.contains(prayerName.name)) {
+                alarmScheduler.schedule(solatAlarmItem)
+            } else {
+                alarmScheduler.cancel(solatAlarmItem)
+            }
         }
     }
 }
