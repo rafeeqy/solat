@@ -4,13 +4,16 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.ChevronLeft
@@ -36,8 +39,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -78,6 +84,11 @@ fun SettingsScreen(
     var showLocale by remember { mutableStateOf(false) }
 
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+
+    val uriHandler = LocalUriHandler.current
+
+    val solatUrl = "https://github.com/rafeeqy/solat"
+    val waktuSolatApiUrl = "https://api.waktusolat.app/"
 
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
@@ -181,31 +192,47 @@ fun SettingsScreen(
                         top = 16.dp,
                         bottom = 32.dp
                     ),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = stringResource(id = R.string.app_name),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(
+                                enabled = true,
+                                role = Role.Button,
+                                onClick = { uriHandler.openUri(solatUrl) }
+                            )
+                            .padding(horizontal = 8.dp),
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
-                        style = if (isRtl) MaterialTheme.typography.titleLarge else MaterialTheme.typography.labelLarge
+                        style = if (isRtl) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge
                     )
 
                     Text(
                         text = "v$versionName ($buildTime)",
                         color = MaterialTheme.colorScheme.secondary,
-                        style = MaterialTheme.typography.labelMedium
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
 
-                Row {
-                    IconButton(onClick = { /* TODO: Open github repo */ }) {
-                        Image(
-                            painter = painterResource(if (isSystemInDarkTheme()) R.drawable.github_white else R.drawable.github),
-                            contentDescription = "Github",
-                            modifier = Modifier.size(24.dp)
+                Box(
+                    modifier = Modifier
+                        .width(180.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(
+                            enabled = true,
+                            role = Role.Button,
+                            onClick = { uriHandler.openUri(waktuSolatApiUrl) }
                         )
-                    }
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.api_waktu_solat),
+                        contentDescription = "Waktu Solat Malaysia Web API",
+                        contentScale = ContentScale.Fit
+                    )
                 }
             }
         }
