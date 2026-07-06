@@ -40,6 +40,9 @@
     <string name="prayer_label_seconds">Seconds</string>
     <string name="prayer_label_today_prayer">Today\'s prayers</string>
 
+    <string name="prayer_notification_title">%1$s Prayer</string>
+    <string name="prayer_notification_message">It is now time for %1$s prayer in your area.</string>
+
     <string name="common_button_cancel">Cancel</string>
 
     <string name="onboarding_button_lets_get_started">Let\'s get started</string>

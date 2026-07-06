@@ -5,10 +5,12 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.view.View
 import dagger.hilt.android.qualifiers.ApplicationContext
 import my.naqibrafiqi.solat.domain.alarm.SolatAlarmScheduler
 import my.naqibrafiqi.solat.domain.model.alarm.SolatAlarmItem
 import my.naqibrafiqi.solat.receiver.SolatAlarmReceiver
+import my.naqibrafiqi.solat.util.converter.toJawiNumerals
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -21,16 +23,21 @@ class OfflineSolatAlarmScheduler @Inject constructor(
 ) : SolatAlarmScheduler {
 
     override fun schedule(item: SolatAlarmItem) {
-        val prayerTime = Instant.ofEpochMilli(item.triggerAtMillis)
+        val isRtl = context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
+
+        val formattedPrayerTime = Instant.ofEpochMilli(item.triggerAtMillis)
             .atZone(ZoneId.systemDefault())
             .toLocalTime()
             .format(DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault()))
             .lowercase()
 
+        val prayerName = context.getString(item.prayerName.resId)
+        val prayerTime = if (isRtl) formattedPrayerTime.toJawiNumerals() else formattedPrayerTime
+
         val intent =
             Intent(context, SolatAlarmReceiver::class.java).apply {
                 action = "my.naqibrafiqi.solat.ACTION_TRIGGER_PRAYER_ALARM"
-                putExtra("EXTRA_PRAYER_NAME", item.prayerName)
+                putExtra("EXTRA_PRAYER_NAME", prayerName)
                 putExtra("EXTRA_PRAYER_TIME", prayerTime)
                 putExtra("EXTRA_ALARM_ID", item.id)
             }

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.AndroidEntryPoint
+import my.naqibrafiqi.solat.R
 import my.naqibrafiqi.solat.util.SolatNotificationManager
 import javax.inject.Inject
 
@@ -22,10 +23,15 @@ class SolatAlarmReceiver : BroadcastReceiver() {
         val prayerTime = intent.getStringExtra("EXTRA_PRAYER_TIME") ?: "-:--"
         val alarmId = intent.getIntExtra("EXTRA_ALARM_ID", 0)
 
+        val title =
+            context.getString(R.string.prayer_notification_title, "$prayerName ($prayerTime)")
+        val message =
+            context.getString(R.string.prayer_notification_message, "$prayerName ($prayerTime)")
+
         notificationManager.showNotification(
             notificationId = alarmId,
-            title = "Waktu $prayerName ($prayerTime)",
-            message = "Telah masuk waktu $prayerName ($prayerTime) bagi kawasan anda.",
+            title = title,
+            message = message,
             deepLinkUri = "solat://prayer/daily"
         )
     }

@@ -40,6 +40,9 @@
     <string name="prayer_label_seconds">ساعت</string>
     <string name="prayer_label_today_prayer">وقتو صلاة هاري اين</string>
 
+    <string name="prayer_notification_title">وقتو %1$s</string>
+    <string name="prayer_notification_message">تله ماسوق وقتو %1$s باݢي کاوسن اندا.</string>
+
     <string name="common_button_cancel">باتل</string>
 
     <string name="onboarding_button_lets_get_started">ايوه مولاكن</string>
