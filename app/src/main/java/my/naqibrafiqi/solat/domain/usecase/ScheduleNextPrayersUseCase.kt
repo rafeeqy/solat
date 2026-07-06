@@ -37,7 +37,7 @@ class ScheduleNextPrayersUseCase @Inject constructor(
             alarmScheduler.schedule(
                 SolatAlarmItem(
                     id = prayerName.ordinal,
-                    prayerName = prayerName.prayerName,
+                    prayerName = prayerName,
                     triggerAtMillis = triggerMillis
                 )
             )

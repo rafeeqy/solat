@@ -40,6 +40,9 @@
     <string name="prayer_label_seconds">Saat</string>
     <string name="prayer_label_today_prayer">Waktu solat hari ini</string>
 
+    <string name="prayer_notification_title">Waktu %1$s</string>
+    <string name="prayer_notification_message">Telah masuk waktu %1$s bagi kawasan anda.</string>
+
     <string name="common_button_cancel">Batal</string>
 
     <string name="onboarding_button_lets_get_started">Ayuh mulakan</string>
