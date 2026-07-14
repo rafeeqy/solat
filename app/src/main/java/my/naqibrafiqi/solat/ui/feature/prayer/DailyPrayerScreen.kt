@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Refresh
@@ -34,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -114,6 +117,7 @@ fun DailyPrayerScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(top = innerPadding.calculateTopPadding())
+                        .verticalScroll(rememberScrollState())
                 ) {
                     Column(
                         modifier = Modifier.weight(1f),
@@ -262,8 +266,8 @@ private fun NextPrayer(
             } else {
                 stringResource(id = R.string.common_label_unknown_prayer)
             },
-            fontSize = 80.sp,
             fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.displayLarge
         )
 
         Text(
@@ -274,9 +278,8 @@ private fun NextPrayer(
             } else {
                 stringResource(id = R.string.common_label_unknown_prayer_time)
             },
-            fontSize = 40.sp,
             fontWeight = FontWeight.Normal,
-            style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Ltr)
+            style = MaterialTheme.typography.headlineMedium.copy(textDirection = TextDirection.Ltr)
         )
     }
 }
@@ -305,7 +308,7 @@ private fun NextPrayerCountdown(
             val count = entry.value.padStart(2, '0')
 
             Surface(
-                modifier = Modifier.widthIn(max = 80.dp),
+                modifier = Modifier.widthIn(max = 96.dp),
                 shape = RoundedCornerShape(16.dp),
                 tonalElevation = 8.dp
             ) {
@@ -318,13 +321,13 @@ private fun NextPrayerCountdown(
                     Text(
                         text = if (isRtl) count.toJawiNumerals() else count,
                         fontWeight = FontWeight.Medium,
-                        style = MaterialTheme.typography.displaySmall
+                        style = MaterialTheme.typography.headlineLarge
                     )
 
                     Text(
                         text = label,
                         fontWeight = FontWeight.Normal,
-                        style = if (isRtl) MaterialTheme.typography.titleLarge else MaterialTheme.typography.labelLarge
+                        style = if (isRtl) MaterialTheme.typography.titleMedium else MaterialTheme.typography.labelLarge
                     )
                 }
             }
@@ -334,7 +337,7 @@ private fun NextPrayerCountdown(
                     text = ":",
                     modifier = Modifier.padding(top = 16.dp),
                     fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.displaySmall
+                    style = MaterialTheme.typography.headlineLarge
                 )
             }
         }
@@ -368,6 +371,10 @@ private fun PrayerTimeCard(
 
     val formattedDate = SolatDateTime.formatLocalDate(date = prayerDate)
 
+    val fontScale = LocalDensity.current.fontScale
+
+    val safeItemWidth = (104 * fontScale).coerceAtMost(140f).dp
+
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     Column(
@@ -396,7 +403,7 @@ private fun PrayerTimeCard(
 
         HorizontalUncontainedCarousel(
             state = carouselState,
-            itemWidth = 104.dp,
+            itemWidth = safeItemWidth,
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
