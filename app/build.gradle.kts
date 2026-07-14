@@ -23,7 +23,7 @@ android {
         minSdk = 29
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0.0"
+        versionName = "1.0.1"
 
         val buildTime = LocalDateTime.now()
             .atZone(ZoneId.of("Asia/Kuala_Lumpur"))
@@ -36,7 +36,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

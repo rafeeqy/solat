@@ -3,6 +3,7 @@ package my.naqibrafiqi.solat.ui.feature.prayer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,7 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Refresh
@@ -34,24 +37,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import my.naqibrafiqi.solat.R
 import my.naqibrafiqi.solat.domain.model.DailyPrayer
 import my.naqibrafiqi.solat.domain.model.PrayerTime
+import my.naqibrafiqi.solat.domain.model.Zone
 import my.naqibrafiqi.solat.domain.model.enums.PrayerName
 import my.naqibrafiqi.solat.ui.component.EmptyContent
+import my.naqibrafiqi.solat.ui.theme.SolatTheme
 import my.naqibrafiqi.solat.util.SolatDateTime
 import my.naqibrafiqi.solat.util.converter.toJawiNumerals
 import my.naqibrafiqi.solat.util.snackbar.SnackbarManager
+import my.naqibrafiqi.solat.util.snackbar.rememberSnackbarState
+import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +69,6 @@ fun DailyPrayerScreen(
     snackbarManager: SnackbarManager,
     onNavigateToSettings: () -> Unit,
     onNavigateToZoneLocation: () -> Unit,
-    modifier: Modifier = Modifier,
     viewModel: DailyPrayerViewModel = hiltViewModel()
 ) {
     val zone = viewModel.zone.collectAsStateWithLifecycle().value
@@ -70,8 +78,29 @@ fun DailyPrayerScreen(
     val countdownText = viewModel.countdownText.collectAsStateWithLifecycle().value
     val nextPrayer = viewModel.nextPrayer.collectAsStateWithLifecycle().value
 
-    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    DailyPrayerScreenContent(
+        zone = zone,
+        todayAndTomorrowPrayers = todayAndTomorrowPrayers,
+        countdownText = countdownText,
+        nextPrayer = nextPrayer,
+        snackbarManager = snackbarManager,
+        onNavigateToSettings = onNavigateToSettings,
+        onNavigateToZoneLocation = onNavigateToZoneLocation
+    )
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DailyPrayerScreenContent(
+    zone: Zone?,
+    todayAndTomorrowPrayers: List<DailyPrayer>,
+    countdownText: String,
+    nextPrayer: PrayerTime?,
+    snackbarManager: SnackbarManager,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToZoneLocation: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -109,15 +138,19 @@ fun DailyPrayerScreen(
             val todayPrayers = todayAndTomorrowPrayers[0]
             val tomorrowPrayers = todayAndTomorrowPrayers[1]
 
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(top = innerPadding.calculateTopPadding())
                 ) {
                     Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(if (isRtl) 8.dp else 32.dp)
+                        modifier = Modifier,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         // Date and Location buttons
                         Column(
@@ -262,8 +295,8 @@ private fun NextPrayer(
             } else {
                 stringResource(id = R.string.common_label_unknown_prayer)
             },
-            fontSize = 80.sp,
             fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.displayLarge
         )
 
         Text(
@@ -274,9 +307,8 @@ private fun NextPrayer(
             } else {
                 stringResource(id = R.string.common_label_unknown_prayer_time)
             },
-            fontSize = 40.sp,
             fontWeight = FontWeight.Normal,
-            style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Ltr)
+            style = MaterialTheme.typography.headlineMedium.copy(textDirection = TextDirection.Ltr)
         )
     }
 }
@@ -305,7 +337,7 @@ private fun NextPrayerCountdown(
             val count = entry.value.padStart(2, '0')
 
             Surface(
-                modifier = Modifier.widthIn(max = 80.dp),
+                modifier = Modifier.widthIn(max = 96.dp),
                 shape = RoundedCornerShape(16.dp),
                 tonalElevation = 8.dp
             ) {
@@ -318,13 +350,13 @@ private fun NextPrayerCountdown(
                     Text(
                         text = if (isRtl) count.toJawiNumerals() else count,
                         fontWeight = FontWeight.Medium,
-                        style = MaterialTheme.typography.displaySmall
+                        style = MaterialTheme.typography.headlineLarge
                     )
 
                     Text(
                         text = label,
                         fontWeight = FontWeight.Normal,
-                        style = if (isRtl) MaterialTheme.typography.titleLarge else MaterialTheme.typography.labelLarge
+                        style = if (isRtl) MaterialTheme.typography.titleMedium else MaterialTheme.typography.labelLarge
                     )
                 }
             }
@@ -334,7 +366,7 @@ private fun NextPrayerCountdown(
                     text = ":",
                     modifier = Modifier.padding(top = 16.dp),
                     fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.displaySmall
+                    style = MaterialTheme.typography.headlineLarge
                 )
             }
         }
@@ -368,18 +400,19 @@ private fun PrayerTimeCard(
 
     val formattedDate = SolatDateTime.formatLocalDate(date = prayerDate)
 
+    val fontScale = LocalDensity.current.fontScale
+
+    val safeItemWidth = (104 * fontScale).coerceAtMost(140f).dp
+
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(
-                horizontal = 16.dp,
-                vertical = 56.dp
-            ),
+            .padding(top = 80.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             Row {
                 Text(
                     text = stringResource(id = R.string.prayer_label_today_prayer),
@@ -396,12 +429,13 @@ private fun PrayerTimeCard(
 
         HorizontalUncontainedCarousel(
             state = carouselState,
-            itemWidth = 104.dp,
+            itemWidth = safeItemWidth,
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(vertical = 16.dp),
-            itemSpacing = 8.dp
+            itemSpacing = 8.dp,
+            contentPadding = PaddingValues(horizontal = 16.dp)
         ) { index ->
             val prayerTime = currentPrayers[index]
 
@@ -440,5 +474,105 @@ private fun PrayerTimeCard(
                 }
             }
         }
+    }
+}
+
+@Preview(
+    name = "Huge Font Test",
+    fontScale = 1.5f,
+    showBackground = true
+)
+@Composable
+private fun DailyPrayerScreenContentPreview() {
+    SolatTheme {
+        DailyPrayerScreenContent(
+            zone = Zone(
+                id = 0,
+                code = "KDH01",
+                state = "Kedah",
+                district = "Kota Setar, Kubang Pasu, Pokok Sena (Daerah Kecil)",
+                createdDate = Instant.now(),
+                updatedDate = Instant.now(),
+                deletedDate = null
+            ),
+            todayAndTomorrowPrayers = listOf(
+                DailyPrayer(
+                    id = 0,
+                    zoneId = 0,
+                    date = LocalDate.now(),
+                    hijri = "1448-01-29",
+                    prayerTimes = listOf(
+                        PrayerTime(
+                            prayer = PrayerName.SUBUH,
+                            time = LocalTime.parse("05:57:00"),
+                            tableRowName = "fajr"
+                        ),
+                        PrayerTime(
+                            prayer = PrayerName.ZOHOR,
+                            time = LocalTime.parse("13:27:00"),
+                            tableRowName = "dhuhr"
+                        ),
+                        PrayerTime(
+                            prayer = PrayerName.ASAR,
+                            time = LocalTime.parse("16:51:00"),
+                            tableRowName = "asr"
+                        ),
+                        PrayerTime(
+                            prayer = PrayerName.MAGHRIB,
+                            time = LocalTime.parse("19:39:00"),
+                            tableRowName = "maghrib"
+                        ),
+                        PrayerTime(
+                            prayer = PrayerName.ISYAK,
+                            time = LocalTime.parse("20:54:00"),
+                            tableRowName = "isha"
+                        )
+                    )
+                ),
+                DailyPrayer(
+                    id = 0,
+                    zoneId = 0,
+                    date = LocalDate.now(),
+                    hijri = "1448-01-29",
+                    prayerTimes = listOf(
+                        PrayerTime(
+                            prayer = PrayerName.SUBUH,
+                            time = LocalTime.parse("05:57:00"),
+                            tableRowName = "fajr"
+                        ),
+                        PrayerTime(
+                            prayer = PrayerName.ZOHOR,
+                            time = LocalTime.parse("13:27:00"),
+                            tableRowName = "dhuhr"
+                        ),
+                        PrayerTime(
+                            prayer = PrayerName.ASAR,
+                            time = LocalTime.parse("16:51:00"),
+                            tableRowName = "asr"
+                        ),
+                        PrayerTime(
+                            prayer = PrayerName.MAGHRIB,
+                            time = LocalTime.parse("19:39:00"),
+                            tableRowName = "maghrib"
+                        ),
+                        PrayerTime(
+                            prayer = PrayerName.ISYAK,
+                            time = LocalTime.parse("20:54:00"),
+                            tableRowName = "isha"
+                        )
+                    )
+                )
+            ),
+            countdownText = "01:46:11",
+            nextPrayer =
+                PrayerTime(
+                    prayer = PrayerName.ASAR,
+                    time = LocalTime.parse("16:51:00"),
+                    tableRowName = "asr"
+                ),
+            snackbarManager = rememberSnackbarState(),
+            onNavigateToSettings = {},
+            onNavigateToZoneLocation = {}
+        )
     }
 }
