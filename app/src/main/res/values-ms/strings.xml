@@ -76,6 +76,17 @@
     <string name="common_prayer_name_maghrib">Maghrib</string>
     <string name="common_prayer_name_isha">Isyak</string>
 
+    <!-- Added in 1.1.0 -->
+    <string name="common_error_title">Ralat telah berlaku :(</string>
+    <string name="common_error_unexpected">Ralat tidak dijangka: %1$s</string>
+    <string name="settings_message_theme_selected">Tema ditukar: %1$s</string>
+    <string name="zone_selection_message_zone_selected">Zon dipilih: %1$s</string>
+    <string name="prayer_button_refresh">Muat semula</string>
+    <string name="prayer_message_refreshed">Waktu solat dikemas kini</string>
+    <string name="prayer_message_refresh_failed">Waktu solat tidak dapat dimuat turun. Semak sambungan internet anda.</string>
+    <string name="notification_channel_name">Waktu solat</string>
+    <string name="notification_channel_description">Notifikasi pada setiap waktu solat</string>
+
     <string-array name="months">
         <item>Januari</item>
         <item>Februari</item>

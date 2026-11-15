@@ -57,6 +57,9 @@ import my.naqibrafiqi.solat.ui.component.EmptyContent
 import my.naqibrafiqi.solat.ui.theme.SolatTheme
 import my.naqibrafiqi.solat.util.SolatDateTime
 import my.naqibrafiqi.solat.util.converter.toJawiNumerals
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import my.naqibrafiqi.solat.util.states.UiEvent
 import my.naqibrafiqi.solat.util.snackbar.SnackbarManager
 import my.naqibrafiqi.solat.util.snackbar.rememberSnackbarState
 import java.time.Instant
@@ -77,6 +80,19 @@ fun DailyPrayerScreen(
 
     val countdownText = viewModel.countdownText.collectAsStateWithLifecycle().value
     val nextPrayer = viewModel.nextPrayer.collectAsStateWithLifecycle().value
+    val isRefreshing = viewModel.isRefreshing.collectAsStateWithLifecycle().value
+
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is UiEvent.Error -> snackbarManager.showSnackbar(event.errorMessage.asString(context))
+                is UiEvent.Success -> snackbarManager.showSnackbar(event.message.asString(context))
+                is UiEvent.Loading -> Unit
+            }
+        }
+    }
 
     DailyPrayerScreenContent(
         zone = zone,
@@ -85,7 +101,9 @@ fun DailyPrayerScreen(
         nextPrayer = nextPrayer,
         snackbarManager = snackbarManager,
         onNavigateToSettings = onNavigateToSettings,
-        onNavigateToZoneLocation = onNavigateToZoneLocation
+        onNavigateToZoneLocation = onNavigateToZoneLocation,
+        isRefreshing = isRefreshing,
+        onRefresh = viewModel::refresh
     )
 }
 
@@ -99,7 +117,9 @@ private fun DailyPrayerScreenContent(
     snackbarManager: SnackbarManager,
     onNavigateToSettings: () -> Unit,
     onNavigateToZoneLocation: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {}
 ) {
     Scaffold(
         modifier = modifier,
@@ -107,10 +127,10 @@ private fun DailyPrayerScreenContent(
             TopAppBar(
                 title = { /* NOTE: Leave this empty... */ },
                 actions = {
-                    IconButton(onClick = { /* TODO: Refresh... */ }) {
+                    IconButton(onClick = onRefresh, enabled = !isRefreshing && zone != null) {
                         Icon(
                             imageVector = Icons.Rounded.Refresh,
-                            contentDescription = "Refresh"
+                            contentDescription = stringResource(id = R.string.prayer_button_refresh)
                         )
                     }
 

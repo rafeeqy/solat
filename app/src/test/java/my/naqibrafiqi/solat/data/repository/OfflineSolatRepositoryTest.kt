@@ -132,6 +132,38 @@ class OfflineSolatRepositoryTest {
     }
 
     @Test
+    fun `refresh downloads today's month again even when it's saved`() = runTest {
+        alreadySaved(YearMonth.of(2026, 11))
+
+        repository.refreshPrayerTimes(zoneId, "JHR02", LocalDate.of(2026, 11, 15))
+
+        assertEquals(listOf(YearMonth.of(2026, 11)), api.requestedMonths)
+        assertEquals(2, fetch(LocalDate.of(2026, 11, 15)).dailyPrayers.size)
+    }
+
+    @Test
+    fun `refresh on the last day of a month downloads both months`() = runTest {
+        repository.refreshPrayerTimes(zoneId, "JHR02", LocalDate.of(2026, 11, 30))
+
+        assertEquals(listOf(YearMonth.of(2026, 11), YearMonth.of(2026, 12)), api.requestedMonths)
+    }
+
+    @Test
+    fun `refresh fails when offline, keeping what's saved`() = runTest {
+        alreadySaved(YearMonth.of(2026, 11))
+        api.failWith = IOException("No internet")
+
+        val failure = runCatching {
+            repository.refreshPrayerTimes(zoneId, "JHR02", LocalDate.of(2026, 11, 15))
+        }.exceptionOrNull()
+
+        assertTrue(failure is IOException)
+        api.failWith = null
+        assertEquals(2, fetch(LocalDate.of(2026, 11, 15)).dailyPrayers.size)
+        assertTrue(api.requestedMonths.isEmpty())
+    }
+
+    @Test
     fun `prayer times are Malaysia time whatever the phone's time zone`() = runTest {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"))
 

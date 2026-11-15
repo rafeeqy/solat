@@ -16,12 +16,19 @@ This app fetch data from [Waktu Solat API](https://api.waktusolat.app/) that pro
 - Choose your prayer zone from the list of JAKIM zones, once, during setup (it can be changed in Settings)
 - A notification at each prayer time, which can be switched on or off for each prayer
 - English, Malay and Jawi, with a light, dark or system theme
-- Prayer times are saved on the phone, so they still show without an internet connection
+- Prayer times are saved on the phone, so they still show without an internet connection, and the refresh button downloads them again
 - (TODO) Determine the Qibla direction (Utitilize Android's SensorManager)
 
 ## Demo
 
-TODO: Insert gif and images
+<p>
+  <img src="docs/screenshots/prayer-times.png" width="200" alt="Today's prayer times, with a countdown to Maghrib">
+  <img src="docs/screenshots/prayer-times-jawi.png" width="200" alt="The same screen in Jawi">
+  <img src="docs/screenshots/notifications.png" width="200" alt="Notification settings, with a switch for each prayer">
+  <img src="docs/screenshots/zones.png" width="200" alt="Choosing a JAKIM prayer zone">
+</p>
+
+Today's prayer times and the countdown to the next one, the same screen in Jawi, the notification settings, and choosing a zone.
 
 ## Installation
 

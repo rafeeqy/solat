@@ -17,4 +17,10 @@ interface SolatRepository {
         zoneCode: String,
         today: LocalDate
     ): Flow<Resource<List<DailyPrayer>>>
+
+    /**
+     * Downloads the months of [today] and tomorrow again, replacing what's saved, even if both
+     * days are already saved. Throws if a month can't be downloaded.
+     */
+    suspend fun refreshPrayerTimes(zoneId: Int, zoneCode: String, today: LocalDate)
 }

@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import my.naqibrafiqi.solat.data.local.db.dao.SolatDao
 import my.naqibrafiqi.solat.data.local.db.entity.ZoneEntity
 import my.naqibrafiqi.solat.data.mapper.toDomain
@@ -87,20 +88,7 @@ class OfflineSolatRepository @Inject constructor(
                 .distinct()
 
             try {
-                missingMonths.forEach { month ->
-                    val remoteMonthlyPrayers = waktuSolatApiService.getPrayerTimes(
-                        zoneCode,
-                        month.year,
-                        month.monthValue
-                    )
-
-                    solatDao.insertMonthlyPrayers(
-                        prayerDetailsEntity = remoteMonthlyPrayers.toEntity(zoneId),
-                        prayerTimeEntities = remoteMonthlyPrayers.prayers.map { prayer ->
-                            prayer.toEntity(prayerDetailsId = 0)
-                        }
-                    )
-                }
+                missingMonths.forEach { month -> downloadMonth(zoneId, zoneCode, month) }
             } catch (e: Exception) {
                 emit(Resource.Error(exception = e))
             }
@@ -166,6 +154,31 @@ class OfflineSolatRepository @Inject constructor(
             emitAll(prayersFlow)
 
         }.flowOn(Dispatchers.IO)
+
+    override suspend fun refreshPrayerTimes(zoneId: Int, zoneCode: String, today: LocalDate) {
+        withContext(Dispatchers.IO) {
+            listOf(today, today.plusDays(1))
+                .map { YearMonth.from(it) }
+                .distinct()
+                .forEach { month -> downloadMonth(zoneId, zoneCode, month) }
+        }
+    }
+
+    /** Downloads one month of prayer times and saves it, replacing the month if it's saved. */
+    private suspend fun downloadMonth(zoneId: Int, zoneCode: String, month: YearMonth) {
+        val remoteMonthlyPrayers = waktuSolatApiService.getPrayerTimes(
+            zoneCode,
+            month.year,
+            month.monthValue
+        )
+
+        solatDao.insertMonthlyPrayers(
+            prayerDetailsEntity = remoteMonthlyPrayers.toEntity(zoneId),
+            prayerTimeEntities = remoteMonthlyPrayers.prayers.map { prayer ->
+                prayer.toEntity(prayerDetailsId = 0)
+            }
+        )
+    }
 
     private fun loadTodayAndTomorrow(zoneId: Int, today: LocalDate, tomorrow: LocalDate) =
         solatDao.loadPrayerForTodayAndTomorrow(

@@ -33,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -68,10 +69,12 @@ fun ZoneSelectionScreen(
 
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         launch {
             snapshotFlow { uiState.errorMessage }.collect { message ->
-                message?.let { snackbarManager.showSnackbar(message = it) }
+                message?.let { snackbarManager.showSnackbar(message = it.asString(context)) }
             }
         }
 
@@ -79,7 +82,7 @@ fun ZoneSelectionScreen(
             viewModel.uiEvent.collect { event ->
                 when (event) {
                     is UiEvent.Error -> {
-                        snackbarManager.showSnackbar(message = event.errorMessage)
+                        snackbarManager.showSnackbar(message = event.errorMessage.asString(context))
                     }
 
                     is UiEvent.Loading -> {
@@ -87,7 +90,7 @@ fun ZoneSelectionScreen(
                     }
 
                     is UiEvent.Success -> {
-                        snackbarManager.showSnackbar(message = event.message)
+                        snackbarManager.showSnackbar(message = event.message.asString(context))
                     }
                 }
             }

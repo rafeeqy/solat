@@ -1,9 +1,12 @@
 package my.naqibrafiqi.solat.ui.feature.prayer
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -19,10 +22,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import my.naqibrafiqi.solat.R
 import my.naqibrafiqi.solat.data.local.datastore.DataStoreManager
 import my.naqibrafiqi.solat.data.local.datastore.SolatDataStore
 import my.naqibrafiqi.solat.domain.model.DailyPrayer
@@ -32,6 +37,8 @@ import my.naqibrafiqi.solat.domain.model.enums.PrayerName
 import my.naqibrafiqi.solat.domain.repository.SolatRepository
 import my.naqibrafiqi.solat.domain.usecase.ScheduleNextPrayersUseCase
 import my.naqibrafiqi.solat.util.states.Resource
+import my.naqibrafiqi.solat.util.states.UiEvent
+import my.naqibrafiqi.solat.util.states.UiText
 import java.time.Clock
 import java.time.Duration
 import java.time.LocalDate
@@ -112,6 +119,44 @@ class DailyPrayerViewModel @Inject constructor(
 
     private val _nextPrayer = MutableStateFlow<PrayerTime?>(null)
     val nextPrayer = _nextPrayer.asStateFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
+    private val _uiEvent = Channel<UiEvent<Unit>>()
+    val uiEvent = _uiEvent.receiveAsFlow()
+
+    /**
+     * Downloads today's and tomorrow's prayer times again. The screen and the alarms update by
+     * themselves when the saved times change.
+     */
+    fun refresh() {
+        val zone = zone.value ?: return
+
+        if (_isRefreshing.value) {
+            return
+        }
+
+        viewModelScope.launch {
+            _isRefreshing.update { true }
+
+            try {
+                solatRepository.refreshPrayerTimes(zone.id, zone.code, LocalDate.now(clock))
+
+                _uiEvent.send(
+                    UiEvent.Success(Unit, UiText.Resource(R.string.prayer_message_refreshed))
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("DailyPrayerViewModel", "Couldn't refresh the prayer times", e)
+
+                _uiEvent.send(UiEvent.Error(UiText.Resource(R.string.prayer_message_refresh_failed)))
+            } finally {
+                _isRefreshing.update { false }
+            }
+        }
+    }
 
     init {
         viewModelScope.launch {

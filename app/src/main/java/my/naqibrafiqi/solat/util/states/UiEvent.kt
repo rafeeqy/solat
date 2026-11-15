@@ -7,11 +7,11 @@ sealed interface UiEvent<out T> {
     ) : UiEvent<Nothing>
 
     data class Error(
-        val errorMessage: String
+        val errorMessage: UiText
     ) : UiEvent<Nothing>
 
     data class Success<T>(
         val data: T,
-        val message: String
+        val message: UiText
     ) : UiEvent<T>
 }

@@ -21,7 +21,10 @@ import my.naqibrafiqi.solat.domain.model.Zone
 import my.naqibrafiqi.solat.domain.model.enums.AppLanguage
 import my.naqibrafiqi.solat.domain.model.enums.ThemeSettings
 import my.naqibrafiqi.solat.domain.repository.SolatRepository
+import my.naqibrafiqi.solat.R
 import my.naqibrafiqi.solat.util.states.UiEvent
+import my.naqibrafiqi.solat.util.states.UiText
+import my.naqibrafiqi.solat.util.states.unexpectedError
 import javax.inject.Inject
 
 @HiltViewModel
@@ -75,11 +78,14 @@ class SettingsViewModel @Inject constructor(
                 _uiEvent.send(
                     UiEvent.Success(
                         data = theme.name,
-                        message = "Success: ${theme.name} selected!"
+                        message = UiText.Resource(
+                            R.string.settings_message_theme_selected,
+                            UiText.Resource(theme.resId)
+                        )
                     )
                 )
             } catch (e: Exception) {
-                _uiEvent.send(UiEvent.Error(errorMessage = "Unexpected error occurred: ${e.message}"))
+                _uiEvent.send(UiEvent.Error(errorMessage = unexpectedError(e)))
             }
         }
     }
