@@ -62,16 +62,14 @@ class SolatNotificationManager @Inject constructor(
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                NOTIFICATION_NAME,
-                NotificationManager.IMPORTANCE_HIGH
-            )
-                .apply { description = NOTIFICATION_DESCRIPTION }
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            NOTIFICATION_NAME,
+            NotificationManager.IMPORTANCE_HIGH
+        )
+            .apply { description = NOTIFICATION_DESCRIPTION }
 
-            notificationManager.createNotificationChannel(channel)
-        }
+        notificationManager.createNotificationChannel(channel)
     }
 
     private fun createPendingIntent(deepLinkUri: String?): PendingIntent {
@@ -85,11 +83,7 @@ class SolatNotificationManager @Inject constructor(
             }
         }
 
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        } else {
-            PendingIntent.FLAG_UPDATE_CURRENT
-        }
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
 
         val requestCode = deepLinkUri?.hashCode() ?: 0
 

@@ -56,13 +56,16 @@ The tests were checked against the 1.0.1 bugs: with the old cancel intent, the o
 **Done when:** `./gradlew testDebugUnitTest` passes. ✅
 
 ### Phase 3: Build and release (S)
-- Fix the build time shown in Settings, which uses the hour in place of the day ("04/11/2026" for a build on 15/11), and stop it changing the build on every run.
-- Take `app/release/` out of git. APKs are published through GitHub Releases.
-- Move dependencies into `libs.versions.toml`, update the Compose BOM, and give the Room compiler the same version as the Room runtime.
-- Ignore unknown fields in API responses, so a new field from the API can't stop prayer times from loading.
-- Remove code for Android versions older than the minimum (Android 10). The alarm scheduler's was removed in Phase 1. The Android 12 check for exact alarms stays, because that permission only exists from Android 12.
+- **Build time.** ✅ The time in Settings used the hour in place of the day ("04/11/2026" for a build on 15/11). Release builds now show the right date, e.g. "v1.1.0 (4:42 pm, 15/11/2026)", and debug builds show "v1.1.0 (debug)", so debug builds no longer recompile on every run.
+- **`app/release/` out of git.** ✅ The 1.0.1 APK and baseline profiles are no longer tracked, and `app/.gitignore` ignores the folder. APKs are published through GitHub Releases. The files stay in the history of the `1.0.0` and `1.0.1` branches.
+- **Version catalog.** ✅ Every library and plugin is now in `libs.versions.toml`, including the Hilt plugin. The Room compiler is 2.8.4, the same as the runtime (it was 2.8.3).
+- **Compose BOM 2026.06.01.** ✅ The old BOM (2024.09.00) mixed versions: the Google Fonts library pulled Compose's runtime and text up to 1.11.3, while foundation stayed at 1.7.2 and Material 3 at 1.3.0. All of Compose is now 1.11.4, with Material 3 1.4.0. The newer BOMs (Compose 1.12) were left for a later version, because 1.12 is a bigger jump.
+- **API responses.** ✅ Unknown fields are ignored, so a new field from the API can't stop prayer times from loading.
+- **Old Android versions.** ✅ Checks for versions below Android 10 are removed: in the alarm scheduler (Phase 1), the notification channel and intent flags, and the notification settings shortcut. The Android 12 (exact alarms) and Android 13 (notification permission) checks stay, because the app still supports Android 10 and 11.
 
-**Done when:** a release build succeeds and the version catalog holds every dependency.
+*Checked:* all 28 tests pass, and the debug build and the minified release build both succeed. The release build, signed with the local debug key, was installed on the emulator with its data cleared. It downloaded the zones and prayer times through R8-shrunk code, scheduled the right alarms, and the screens look the same as before the Compose update.
+
+**Done when:** a release build succeeds and the version catalog holds every dependency. ✅
 
 ### Phase 4: Polish (S)
 - A one-colour notification icon in place of the launcher icon.

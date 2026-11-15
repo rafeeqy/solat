@@ -9,19 +9,8 @@ import android.provider.Settings
 import androidx.core.content.ContextCompat
 
 fun requestNotificationPermission(context: Context) {
-    val intent = Intent().apply {
-        when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
-                action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-            }
-
-            else -> {
-                action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                data = android.net.Uri.fromParts("package", context.packageName, null)
-            }
-        }
-
+    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
     }
 
