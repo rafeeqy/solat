@@ -14,6 +14,13 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+
+    /**
+     * Ignores fields the app doesn't know about, so a new field in the API's responses can't stop
+     * prayer times from loading.
+     */
+    private val json = Json { ignoreUnknownKeys = true }
+
     @Singleton
     @Provides
     fun provideRetrofit(): Retrofit {
@@ -21,7 +28,7 @@ object NetworkModule {
             .Builder()
             .baseUrl("https://api.waktusolat.app/")
             .addConverterFactory(
-                Json.asConverterFactory(
+                json.asConverterFactory(
                     "application/json; charset=UTF8".toMediaType()
                 )
             )

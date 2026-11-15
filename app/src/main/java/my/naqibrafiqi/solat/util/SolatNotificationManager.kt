@@ -24,8 +24,6 @@ class SolatNotificationManager @Inject constructor(
 
     companion object {
         private const val CHANNEL_ID = "SOLAT_NOTIFICATIONS"
-        private const val NOTIFICATION_NAME = "Prayer Time Notifications"
-        private const val NOTIFICATION_DESCRIPTION = "Shows notification when it is prayer time"
     }
 
     fun showNotification(
@@ -50,7 +48,8 @@ class SolatNotificationManager @Inject constructor(
         val pendingIntent = createPendingIntent(deepLinkUri)
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setColor(ContextCompat.getColor(context, R.color.notification_accent))
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -62,16 +61,16 @@ class SolatNotificationManager @Inject constructor(
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                NOTIFICATION_NAME,
-                NotificationManager.IMPORTANCE_HIGH
-            )
-                .apply { description = NOTIFICATION_DESCRIPTION }
+        // Created on every notification, which also updates the name and description shown in
+        // the system's notification settings to the current language.
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            context.getString(R.string.notification_channel_name),
+            NotificationManager.IMPORTANCE_HIGH
+        )
+            .apply { description = context.getString(R.string.notification_channel_description) }
 
-            notificationManager.createNotificationChannel(channel)
-        }
+        notificationManager.createNotificationChannel(channel)
     }
 
     private fun createPendingIntent(deepLinkUri: String?): PendingIntent {
@@ -85,11 +84,7 @@ class SolatNotificationManager @Inject constructor(
             }
         }
 
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        } else {
-            PendingIntent.FLAG_UPDATE_CURRENT
-        }
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
 
         val requestCode = deepLinkUri?.hashCode() ?: 0
 

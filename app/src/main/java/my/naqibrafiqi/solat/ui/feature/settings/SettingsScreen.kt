@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -90,11 +91,13 @@ fun SettingsScreen(
     val solatUrl = "https://github.com/rafeeqy/solat"
     val waktuSolatApiUrl = "https://api.waktusolat.app/"
 
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
             when (event) {
                 is UiEvent.Error -> {
-                    snackbarManager.showSnackbar(message = event.errorMessage)
+                    snackbarManager.showSnackbar(message = event.errorMessage.asString(context))
                 }
 
                 is UiEvent.Loading -> {
@@ -102,7 +105,7 @@ fun SettingsScreen(
                 }
 
                 is UiEvent.Success<*> -> {
-                    snackbarManager.showSnackbar(message = event.message)
+                    snackbarManager.showSnackbar(message = event.message.asString(context))
                 }
             }
         }

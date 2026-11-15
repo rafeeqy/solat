@@ -14,13 +14,19 @@ import java.util.Locale
 
 object SolatDateTime {
 
+    /**
+     * JAKIM prayer times are Malaysia time. Every date and time in the app is worked out in this
+     * zone, whatever the phone's own time zone is, so the countdown and alarms match the timetable.
+     */
+    val ZONE: ZoneId = ZoneId.of("Asia/Kuala_Lumpur")
+
     fun nowEpochMilli(): Long {
         return Instant.now().toEpochMilli()
     }
 
     fun fromEpochSecondToLocalTime(epochSecond: Long): LocalTime {
         return Instant.ofEpochSecond(epochSecond)
-            .atZone(ZoneId.of("Asia/Kuala_Lumpur"))
+            .atZone(ZONE)
             .toLocalTime()
     }
 
@@ -36,7 +42,7 @@ object SolatDateTime {
         val days = stringArrayResource(id = R.array.days_of_week)
 
         val localDate = Instant.ofEpochMilli(date)
-            .atZone(ZoneId.of("Asia/Kuala_Lumpur"))
+            .atZone(ZONE)
             .toLocalDate()
 
         val monthName = months[localDate.monthValue - 1]
@@ -56,7 +62,7 @@ object SolatDateTime {
         val hijriMonths = stringArrayResource(id = R.array.hijri_months)
 
         val localDate = Instant.ofEpochMilli(date)
-            .atZone(ZoneId.of("Asia/Kuala_Lumpur"))
+            .atZone(ZONE)
             .toLocalDate()
 
         val hijriDate = HijrahDate.from(localDate)
@@ -82,7 +88,7 @@ object SolatDateTime {
 
         val formattedDate = date.format(
             DateTimeFormatter.ofPattern("dd/MM/uuuu")
-                .withZone(ZoneId.of("Asia/Kuala_Lumpur"))
+                .withZone(ZONE)
         )
 
         return "$dayName, $formattedDate"

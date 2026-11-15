@@ -1,4 +1,4 @@
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -8,9 +8,14 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
-    id("com.google.dagger.hilt.android")
+    alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
 }
+
+// Shown in Settings next to the version, e.g. "4:04 pm, 15/11/2026" (Malaysia time). Only release
+// builds carry it: a value that changes on every build would make every debug build recompile.
+val releaseBuildTime: String = ZonedDateTime.now(ZoneId.of("Asia/Kuala_Lumpur"))
+    .format(DateTimeFormatter.ofPattern("h:mm a, dd/MM/uuuu", Locale.ENGLISH))
 
 android {
     namespace = "my.naqibrafiqi.solat"
@@ -22,20 +27,19 @@ android {
         applicationId = "my.naqibrafiqi.solat"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.1"
-
-        val buildTime = LocalDateTime.now()
-            .atZone(ZoneId.of("Asia/Kuala_Lumpur"))
-            .format(DateTimeFormatter.ofPattern("h:mm a, hh/MM/uuuu"))
-
-        buildConfigField("String", "BUILD_TIME", "\"$buildTime\"")
+        versionCode = 2
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "BUILD_TIME", "\"debug\"")
+        }
         release {
+            buildConfigField("String", "BUILD_TIME", "\"$releaseBuildTime\"")
+
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -56,78 +60,72 @@ android {
         compose = true
     }
 
+    testOptions {
+        unitTests {
+            // Robolectric needs the merged resources to run Android code (Room, AlarmManager)
+            // on the JVM.
+            isIncludeAndroidResources = true
+        }
+    }
+
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
     }
 }
 
 dependencies {
+    // AndroidX
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.navigation.compose)
+
+    // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.ui.text.google.fonts)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
 
-    // Appcompat
-    implementation("androidx.appcompat:appcompat:1.7.1")
+    // Dependency injection (Hilt, with WorkManager and Navigation)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
-    // Splash screen
-    implementation("androidx.core:core-splashscreen:1.2.0")
+    // Storage: Room and DataStore
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.datastore.preferences)
 
-    // Compose Material Icons Extended
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    // Background work
+    implementation(libs.androidx.work.runtime.ktx)
 
-    // Google Fonts
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.11.3")
+    // Networking: Retrofit (https://github.com/square/retrofit) with kotlinx.serialization
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.kotlinx.serialization)
+    implementation(libs.kotlinx.serialization.json)
 
-    // ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
-
-    // Navigation
-    implementation("androidx.navigation:navigation-compose:2.9.6")
-
-    // Kotlin JSON Serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-
-    // DI with Hilt
-    implementation("com.google.dagger:hilt-android:2.57.2")
-    ksp("com.google.dagger:hilt-android-compiler:2.57.2")
-    // Hilt for WorkManager
-    implementation("androidx.hilt:hilt-work:1.3.0")
-    ksp("androidx.hilt:hilt-compiler:1.3.0")
-    // Hilt with Navigation
-    implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
-
-    // Room Database
-    implementation("androidx.room:room-runtime:2.8.4")
-    ksp("androidx.room:room-compiler:2.8.3")
-    implementation("androidx.room:room-ktx:2.8.4")
-
-    // DataStore
-    implementation("androidx.datastore:datastore-preferences:1.2.0")
-
-    // WorkManager
-    implementation("androidx.work:work-runtime-ktx:2.11.0")
-
-    // Retrofit
-    // repo: https://github.com/square/retrofit
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-kotlinx-serialization:3.0.0")
-
-    // Google Accompanist
-    implementation("com.google.accompanist:accompanist-permissions:0.37.3")
+    // Permissions
+    implementation(libs.accompanist.permissions)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-
-    // WorkManager test helpers
-    androidTestImplementation("androidx.work:work-testing:2.11.0")
+    androidTestImplementation(libs.androidx.work.testing)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)

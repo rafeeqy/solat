@@ -1,1 +1,3 @@
 /build
+# Android Studio writes signed release APKs here. APKs are published on GitHub Releases.
+/release

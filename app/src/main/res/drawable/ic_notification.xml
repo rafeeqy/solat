@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Notification small icon: a crescent. Android draws it from the alpha channel only, in one
+     colour, so it must be a single solid shape. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M11.67,3.01 A9,9 0 1,0 20.73,14.2 A7.2,7.2 0 0,1 11.67,3.01 Z" />
+
+</vector>
