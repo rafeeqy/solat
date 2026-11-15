@@ -76,6 +76,17 @@
     <string name="common_prayer_name_maghrib">Maghrib</string>
     <string name="common_prayer_name_isha">Isha</string>
 
+    <!-- Added in 1.1.0 -->
+    <string name="common_error_title">Something went wrong :(</string>
+    <string name="common_error_unexpected">Unexpected error: %1$s</string>
+    <string name="settings_message_theme_selected">Theme changed: %1$s</string>
+    <string name="zone_selection_message_zone_selected">Zone selected: %1$s</string>
+    <string name="prayer_button_refresh">Refresh</string>
+    <string name="prayer_message_refreshed">Prayer times updated</string>
+    <string name="prayer_message_refresh_failed">Couldn\'t download the prayer times. Check your internet connection.</string>
+    <string name="notification_channel_name">Prayer times</string>
+    <string name="notification_channel_description">A notification at each prayer time</string>
+
     <string-array name="months">
         <item>January</item>
         <item>February</item>

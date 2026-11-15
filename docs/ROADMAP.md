@@ -68,10 +68,14 @@ The tests were checked against the 1.0.1 bugs: with the old cancel intent, the o
 **Done when:** a release build succeeds and the version catalog holds every dependency. ✅
 
 ### Phase 4: Polish (S)
-- A one-colour notification icon in place of the launcher icon.
-- Move the English text written into the ViewModels into string resources, so it's translated with the rest of the app.
-- Make sure the last zones in the list can scroll clear of the "Finished set up" button.
-- The refresh button on the prayer screen does nothing yet (its action is a TODO). Make it download the prayer times again, or remove it.
-- Add screenshots to the README's Demo section.
+- **Notification icon.** ✅ The small icon was the launcher icon's foreground, the word "SOLAT", which Android shrinks to a blur. It's now a crescent (`ic_notification`), tinted with the app's green.
+- **Text in the ViewModels.** ✅ The snackbar messages ("Success: SYSTEM selected!", "Unexpected error occurred: …", "Flow crashed: …"), the error screen's title and the notification channel's name and description are now string resources in English, Malay and Jawi. ViewModels pass a `UiText` (a string resource and its arguments), which the screen looks up in the current language. The theme message now names the theme ("Theme changed: Dark mode") instead of the enum.
+- **Zone list.** ✅ No change needed: the list already leaves room for the "Finished set up" button. *Checked on the emulator:* the last zone, WLY02 Labuan, scrolls clear of it.
+- **Refresh button.** ✅ It now downloads today's and tomorrow's months again, even when they're saved. The screen and the alarms update by themselves, and a snackbar says "Prayer times updated" or that the download failed. The button is disabled while it works. *Checked on the emulator:* the month is saved again and the snackbar shows, in English and in Jawi. Three repository tests cover it (31 tests in all).
+- **README screenshots.** ✅ Four screenshots from the emulator, in `docs/screenshots/`.
 
-**Done when:** every phase above is merged and 1.1.0 is ready to release.
+**Not checked:** the new notification icon in a real notification, for the same reason as Phase 1 (the alarm can't be made to go off on the emulator).
+
+**For the owner to check:** the new Malay and Jawi strings. They reuse words already in the app where possible, but a native reader should look them over, especially the Jawi spellings of *ralat*, *dijangka*, *ditukar*, *dikemas kini*, *dimuat turun* and *sambungan*.
+
+**Done when:** every phase above is merged and 1.1.0 is ready to release. ✅ Once this branch is merged.

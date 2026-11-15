@@ -76,6 +76,17 @@
     <string name="common_prayer_name_maghrib">مغرب</string>
     <string name="common_prayer_name_isha">عشاء</string>
 
+    <!-- Added in 1.1.0 -->
+    <string name="common_error_title">رالت تله برلاکو :(</string>
+    <string name="common_error_unexpected">رالت تيدق دجڠک: %1$s</string>
+    <string name="settings_message_theme_selected">تيما دتوکر: %1$s</string>
+    <string name="zone_selection_message_zone_selected">زون دڤيليه: %1$s</string>
+    <string name="prayer_button_refresh">موات سمولا</string>
+    <string name="prayer_message_refreshed">وقتو صلاة دکمس کيني</string>
+    <string name="prayer_message_refresh_failed">وقتو صلاة تيدق داڤت دموات تورون. سمق سمبوڠن اينترنيت اندا.</string>
+    <string name="notification_channel_name">وقتو صلاة</string>
+    <string name="notification_channel_description">نوتيفيكاسي ڤد ستياڤ وقتو صلاة</string>
+
     <string-array name="months">
         <item>جانواري</item>
         <item>فيبرواري</item>

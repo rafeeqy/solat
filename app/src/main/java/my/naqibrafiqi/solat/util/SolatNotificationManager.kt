@@ -24,8 +24,6 @@ class SolatNotificationManager @Inject constructor(
 
     companion object {
         private const val CHANNEL_ID = "SOLAT_NOTIFICATIONS"
-        private const val NOTIFICATION_NAME = "Prayer Time Notifications"
-        private const val NOTIFICATION_DESCRIPTION = "Shows notification when it is prayer time"
     }
 
     fun showNotification(
@@ -50,7 +48,8 @@ class SolatNotificationManager @Inject constructor(
         val pendingIntent = createPendingIntent(deepLinkUri)
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setColor(ContextCompat.getColor(context, R.color.notification_accent))
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -62,12 +61,14 @@ class SolatNotificationManager @Inject constructor(
     }
 
     private fun createNotificationChannel() {
+        // Created on every notification, which also updates the name and description shown in
+        // the system's notification settings to the current language.
         val channel = NotificationChannel(
             CHANNEL_ID,
-            NOTIFICATION_NAME,
+            context.getString(R.string.notification_channel_name),
             NotificationManager.IMPORTANCE_HIGH
         )
-            .apply { description = NOTIFICATION_DESCRIPTION }
+            .apply { description = context.getString(R.string.notification_channel_description) }
 
         notificationManager.createNotificationChannel(channel)
     }

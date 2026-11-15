@@ -16,7 +16,10 @@ import my.naqibrafiqi.solat.data.local.db.entity.ZoneEntity
 import my.naqibrafiqi.solat.domain.model.Zone
 import my.naqibrafiqi.solat.domain.repository.SolatRepository
 import my.naqibrafiqi.solat.util.states.Resource
+import my.naqibrafiqi.solat.R
 import my.naqibrafiqi.solat.util.states.UiEvent
+import my.naqibrafiqi.solat.util.states.UiText
+import my.naqibrafiqi.solat.util.states.unexpectedError
 import javax.inject.Inject
 
 @HiltViewModel
@@ -59,7 +62,7 @@ class ZoneSelectionViewModel @Inject constructor(
                         if (currentState.zones.isEmpty()) {
                             currentState.copy(
                                 isLoading = false,
-                                errorMessage = "Unexpected error occurred: ${resource.exception.message}"
+                                errorMessage = unexpectedError(resource.exception)
                             )
                         } else {
                             currentState.copy(
@@ -84,7 +87,7 @@ class ZoneSelectionViewModel @Inject constructor(
                 emit(
                     ZoneSelectionUiState(
                         isLoading = false,
-                        errorMessage = "Flow crashed: ${e.message}",
+                        errorMessage = unexpectedError(e),
                         isInternalError = true
                     )
                 )
@@ -106,11 +109,14 @@ class ZoneSelectionViewModel @Inject constructor(
                 _uiEvent.send(
                     UiEvent.Success(
                         data = zone.code,
-                        message = "Success: ${zone.state} (${zone.code}) selected!"
+                        message = UiText.Resource(
+                            R.string.zone_selection_message_zone_selected,
+                            "${zone.state} (${zone.code})"
+                        )
                     )
                 )
             } catch (e: Exception) {
-                _uiEvent.send(UiEvent.Error("Unexpected error occurred: ${e.message}"))
+                _uiEvent.send(UiEvent.Error(unexpectedError(e)))
             }
         }
     }
