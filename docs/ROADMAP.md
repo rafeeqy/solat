@@ -38,16 +38,22 @@ Sizes: **S** is about one working session, **M** is 2–3 sessions. Each phase e
 3. **The month boundary.** ✅ On the last day of a month, the query for "today and tomorrow" returned the 1st and the last day of the *same* month, so the next month was never downloaded. The query now matches full dates, the repository downloads the month of whichever day is missing, and each month is saved in one database transaction. The countdown no longer freezes after the last loaded prayer, and it loads the new day's prayers at midnight. The monthly cleanup now deletes every month before the current one, not just last month. *Checked against the app's database: on 30 Nov the query returns only the 30th (it used to return 1 Nov as "tomorrow"), so December is downloaded.*
 4. **Alarms that keep going.** ✅ When an alarm goes off, it schedules the next alarms through a background job. They're also scheduled again after a reboot, an app update, a manual clock change, and when exact alarms are allowed. A reboot no longer runs the work inside the receiver, where it could be cut off. The daily background job no longer waits for the battery to be above low (existing installs are updated too). Turning prayer times into alarms is now one use case (`RefreshPrayerAlarmsUseCase`), shared by the worker and the notification settings. *Checked on the emulator: after an app update and after a reboot, the alarms are scheduled again within about 30 seconds, without opening the app.*
 
-Not checked: an alarm actually going off and posting its notification, because that needs the emulator's clock moved forward. Phase 2's tests cover the receiver's logic.
+Not checked on the emulator: an alarm actually going off and posting its notification, because that needs the emulator's clock moved forward. Phase 2's `PrayerAlarmHandlerTest` covers it instead.
 
 **Done when:** each fix is checked on the emulator, and a switched-off prayer, a phone in another time zone and the last day of a month all behave correctly.
 
 ### Phase 2: Tests (S)
-- Unit tests for `ScheduleNextPrayersUseCase`, with a fake scheduler and a fixed clock.
-- Database tests for a normal day, 30 Nov → 1 Dec, and 31 Dec → 1 Jan.
-- Remove the template example tests.
+28 tests, all run on the JVM with `./gradlew testDebugUnitTest`. Robolectric 4.18 stands in for Android (Room, AlarmManager, notifications), so they don't need a phone or emulator. Versions match Pustaka's.
+- `ScheduleNextPrayersUseCaseTest` ✅ (6): with a fake scheduler and a fixed clock. Covers each enabled prayer's next time, cancelling switched-off prayers (even with no times loaded), Malaysia time on a GMT phone, a prayer whose time is now, and after Isyak.
+- `OfflineSolatAlarmSchedulerTest` ✅ (5): the real scheduler against Robolectric's AlarmManager. `cancel()` removes what `schedule()` set, keeps other prayers, scheduling again replaces, and the alarm carries the prayer and its time.
+- `PrayerAlarmHandlerTest` ✅ (4): what happens when an alarm goes off. An enabled prayer posts "Maghrib (6:52 pm)", a switched-off prayer posts nothing, 1.0.x alarms show the time they carry, and other intents are ignored. To make this testable, the receiver's logic moved into `PrayerAlarmHandler`. The receiver keeps only `goAsync()` and queuing the next alarms.
+- `SolatDaoTest` ✅ (7): an in-memory database. Covers a normal day, 30 Nov with only November saved, 30 Nov → 1 Dec, 31 Dec → 1 Jan, other zones, saving a month twice, and the cleanup.
+- `OfflineSolatRepositoryTest` ✅ (6): with a fake API. Covers which months are downloaded on a normal day, at the end of a month and at the end of the year, offline behaviour, and Malaysia time on a GMT phone.
+- The template example tests are removed. ✅
 
-**Done when:** `./gradlew testDebugUnitTest` and the database tests pass.
+The tests were checked against the 1.0.1 bugs: with the old cancel intent, the old query and alarms in the phone's time zone put back, 9 of them fail.
+
+**Done when:** `./gradlew testDebugUnitTest` passes. ✅
 
 ### Phase 3: Build and release (S)
 - Fix the build time shown in Settings, which uses the hour in place of the day ("04/11/2026" for a build on 15/11), and stop it changing the build on every run.

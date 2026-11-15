@@ -56,6 +56,14 @@ android {
         compose = true
     }
 
+    testOptions {
+        unitTests {
+            // Robolectric needs the merged resources to run Android code (Room, AlarmManager)
+            // on the JVM.
+            isIncludeAndroidResources = true
+        }
+    }
+
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
     }
@@ -121,6 +129,9 @@ dependencies {
     implementation("com.google.accompanist:accompanist-permissions:0.37.3")
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
