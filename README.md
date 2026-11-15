@@ -37,6 +37,12 @@ Requires Android 10 (API 29) or newer.
 
 The build needs JDK 17 or newer (Android Studio's bundled JDK works) and an Android SDK with API 36.
 
+Tests:
+```bash
+./gradlew testDebugUnitTest
+```
+They run on the JVM with Robolectric, so no phone or emulator is needed.
+
 ## How Solat is made
 
 Solat is vibe coded from version 1.1.0 on. The code, tests and docs added since then have been written by Claude, Anthropic's AI model, working in [Claude Code](https://claude.com/claude-code). Before that, the project owner wrote the app by hand, up to and including the 1.0.1 release.
