@@ -33,10 +33,12 @@ Sizes: **S** is about one working session, **M** is 2–3 sessions. Each phase e
 **Done when:** the app builds as 1.1.0 and the docs are in place.
 
 ### Phase 1: Notifications that are right and reliable (M)
-1. **Switching a prayer off cancels its alarm.** Today `cancel()` looks for the alarm with a different intent from the one `schedule()` used, so it never finds it. On the emulator, Asr's alarm stayed scheduled after Asr was switched off. One function will build the intent for both, and the alarm receiver will check the enabled prayers before posting a notification.
-2. **One time zone everywhere.** Prayer times are read in Malaysia time, but the countdown and alarms use the phone's time zone. On a GMT emulator the countdown pointed at a prayer that had passed and every alarm was 8 hours late. Alarms will be scheduled from the API's own timestamps, and the countdown will use Malaysia time.
-3. **The month boundary.** On the last day of a month, the query for "today and tomorrow" returns the 1st and the last day of the *same* month, so the next month is never downloaded and the next morning's alarms aren't set. The query will match exact dates. The month's details and its daily times will be saved in one database transaction, and the countdown will refresh itself at midnight.
-4. **Alarms that keep going.** When an alarm goes off, it schedules that prayer's next one. Alarms are also scheduled again after a reboot (through a background job, so it isn't cut off), after the time or time zone changes, after an app update, and when exact alarms are allowed. The daily background job no longer waits for the battery to be above low.
+1. **Switching a prayer off cancels its alarm.** ✅ `cancel()` looked for the alarm with a different intent from the one `schedule()` used, so it never found it. One function now builds the intent for both. The alarm receiver also checks the enabled prayers before posting, which covers alarms set by 1.0.x. *Checked on the emulator: switching Asr on adds tomorrow's 16:14 alarm, and switching it off removes it.*
+2. **One time zone everywhere.** ✅ Prayer times were read in Malaysia time, but the countdown and alarms used the phone's time zone, so on a GMT phone the countdown pointed at a prayer that had passed and every alarm was 8 hours late. Everything that needs "now" or "today" now uses Malaysia time, through one `Clock` (which Phase 2's tests can also fix in place). *Checked on a GMT emulator: at 16:26 Malaysia time the countdown shows Maghrib in 2h25m, and the alarms are at 18:52, 20:05, 05:37 and 12:52 Malaysia time.*
+3. **The month boundary.** ✅ On the last day of a month, the query for "today and tomorrow" returned the 1st and the last day of the *same* month, so the next month was never downloaded. The query now matches full dates, the repository downloads the month of whichever day is missing, and each month is saved in one database transaction. The countdown no longer freezes after the last loaded prayer, and it loads the new day's prayers at midnight. The monthly cleanup now deletes every month before the current one, not just last month. *Checked against the app's database: on 30 Nov the query returns only the 30th (it used to return 1 Nov as "tomorrow"), so December is downloaded.*
+4. **Alarms that keep going.** ✅ When an alarm goes off, it schedules the next alarms through a background job. They're also scheduled again after a reboot, an app update, a manual clock change, and when exact alarms are allowed. A reboot no longer runs the work inside the receiver, where it could be cut off. The daily background job no longer waits for the battery to be above low (existing installs are updated too). Turning prayer times into alarms is now one use case (`RefreshPrayerAlarmsUseCase`), shared by the worker and the notification settings. *Checked on the emulator: after an app update and after a reboot, the alarms are scheduled again within about 30 seconds, without opening the app.*
+
+Not checked: an alarm actually going off and posting its notification, because that needs the emulator's clock moved forward. Phase 2's tests cover the receiver's logic.
 
 **Done when:** each fix is checked on the emulator, and a switched-off prayer, a phone in another time zone and the last day of a month all behave correctly.
 
@@ -52,7 +54,7 @@ Sizes: **S** is about one working session, **M** is 2–3 sessions. Each phase e
 - Take `app/release/` out of git. APKs are published through GitHub Releases.
 - Move dependencies into `libs.versions.toml`, update the Compose BOM, and give the Room compiler the same version as the Room runtime.
 - Ignore unknown fields in API responses, so a new field from the API can't stop prayer times from loading.
-- Remove code for Android versions older than the minimum (Android 10).
+- Remove code for Android versions older than the minimum (Android 10). The alarm scheduler's was removed in Phase 1. The Android 12 check for exact alarms stays, because that permission only exists from Android 12.
 
 **Done when:** a release build succeeds and the version catalog holds every dependency.
 
@@ -60,6 +62,7 @@ Sizes: **S** is about one working session, **M** is 2–3 sessions. Each phase e
 - A one-colour notification icon in place of the launcher icon.
 - Move the English text written into the ViewModels into string resources, so it's translated with the rest of the app.
 - Make sure the last zones in the list can scroll clear of the "Finished set up" button.
+- The refresh button on the prayer screen does nothing yet (its action is a TODO). Make it download the prayer times again, or remove it.
 - Add screenshots to the README's Demo section.
 
 **Done when:** every phase above is merged and 1.1.0 is ready to release.

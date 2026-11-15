@@ -381,7 +381,7 @@ private fun PrayerTimeCard(
     currentPrayer: PrayerTime?,
     modifier: Modifier = Modifier
 ) {
-    val currentTime = LocalTime.now()
+    val currentTime = LocalTime.now(SolatDateTime.ZONE)
     val todayIsha = todayPrayer.prayerTimes.find { it.prayer == PrayerName.ISYAK }
 
     val isPastTodayIsha = currentTime.isAfter(todayIsha?.time)
