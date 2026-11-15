@@ -40,9 +40,9 @@ class SolatApplication : Application(), Configuration.Provider {
                 .setConstraints(constraints)
                 .build()
 
+        // No constraints: the alarms matter more than the battery, and the work is small.
         val dailyAlarmWorkRequest =
             PeriodicWorkRequestBuilder<DailyAlarmWorker>(1, TimeUnit.DAYS)
-                .setConstraints(constraints)
                 .build()
 
         val workManager = WorkManager.getInstance(this)
@@ -53,9 +53,10 @@ class SolatApplication : Application(), Configuration.Provider {
             cleanupWorkRequest
         )
 
+        // UPDATE (not KEEP) so installs from 1.0.x drop the old battery-not-low constraint.
         workManager.enqueueUniquePeriodicWork(
-            "DailyPrayerAlarmWork",
-            ExistingPeriodicWorkPolicy.KEEP,
+            DailyAlarmWorker.PERIODIC_WORK_NAME,
+            ExistingPeriodicWorkPolicy.UPDATE,
             dailyAlarmWorkRequest
         )
     }

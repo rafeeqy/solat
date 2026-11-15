@@ -1,64 +1,58 @@
 package my.naqibrafiqi.solat.data.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.firstOrNull
-import my.naqibrafiqi.solat.data.local.datastore.DataStoreManager
-import my.naqibrafiqi.solat.data.local.datastore.SolatDataStore
-import my.naqibrafiqi.solat.domain.repository.SolatRepository
-import my.naqibrafiqi.solat.domain.usecase.ScheduleNextPrayersUseCase
-import my.naqibrafiqi.solat.util.states.Resource
-import java.time.LocalDate
+import my.naqibrafiqi.solat.domain.usecase.RefreshPrayerAlarmsUseCase
 
+/**
+ * Schedules the prayer alarms for today and tomorrow. Runs once a day, and once straight away
+ * whenever something may have made the alarms out of date (see [enqueueNow]).
+ */
 @HiltWorker
 class DailyAlarmWorker @AssistedInject constructor(
-    @Assisted private val appContext: Context,
-    @Assisted private val workerParams: WorkerParameters,
-    private val dataStore: SolatDataStore,
-    private val solatRepository: SolatRepository,
-    private val scheduleNextPrayers: ScheduleNextPrayersUseCase
+    @Assisted appContext: Context,
+    @Assisted workerParams: WorkerParameters,
+    private val refreshPrayerAlarms: RefreshPrayerAlarmsUseCase
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
         return try {
-            val zoneCode = dataStore.getZoneCode().firstOrNull() ?: return Result.failure()
-
-            val zone =
-                solatRepository.fetchZoneByCode(zoneCode).firstOrNull() ?: return Result.failure()
-
-            val enabledPrayers = dataStore.getEnabledPrayers().firstOrNull() ?: DataStoreManager.DEFAULT_ENABLED_PRAYERS
-
-            val prayerResource = solatRepository.fetchDailyPrayersForTodayAndTomorrow(
-                zoneId = zone.id,
-                zoneCode = zone.code,
-                today = LocalDate.now()
-            ).firstOrNull { it !is Resource.Loading }
-
-            when (prayerResource) {
-                is Resource.Error -> {
-                    Result.retry()
-                }
-
-                is Resource.Success -> {
-                    if (prayerResource.data.isNotEmpty()) {
-                        scheduleNextPrayers(prayerResource.data, enabledPrayers)
-                        Result.success()
-                    } else {
-                        Result.retry()
-                    }
-                }
-
-                else -> {
-                    Result.failure()
-                }
+            when (refreshPrayerAlarms()) {
+                RefreshPrayerAlarmsUseCase.Result.Scheduled -> Result.success()
+                RefreshPrayerAlarmsUseCase.Result.NoZone -> Result.success()
+                // Usually no internet connection; WorkManager tries again with backoff.
+                RefreshPrayerAlarmsUseCase.Result.Incomplete -> Result.retry()
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.w(TAG, "Couldn't refresh the prayer alarms", e)
             Result.retry()
+        }
+    }
+
+    companion object {
+        private const val TAG = "DailyAlarmWorker"
+
+        const val PERIODIC_WORK_NAME = "DailyPrayerAlarmWork"
+        private const val ONE_TIME_WORK_NAME = "RefreshPrayerAlarmsNow"
+
+        /**
+         * Refreshes the alarms now: after an alarm goes off (to schedule that prayer's next one),
+         * after a reboot, an app update or a clock change, and when exact alarms are allowed.
+         */
+        fun enqueueNow(workManager: WorkManager) {
+            workManager.enqueueUniqueWork(
+                ONE_TIME_WORK_NAME,
+                ExistingWorkPolicy.REPLACE,
+                OneTimeWorkRequestBuilder<DailyAlarmWorker>().build()
+            )
         }
     }
 }

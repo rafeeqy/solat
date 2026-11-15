@@ -5,16 +5,11 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.view.View
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import my.naqibrafiqi.solat.domain.alarm.SolatAlarmScheduler
 import my.naqibrafiqi.solat.domain.model.alarm.SolatAlarmItem
 import my.naqibrafiqi.solat.receiver.SolatAlarmReceiver
-import my.naqibrafiqi.solat.util.converter.toJawiNumerals
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import javax.inject.Inject
 
 class OfflineSolatAlarmScheduler @Inject constructor(
@@ -23,84 +18,60 @@ class OfflineSolatAlarmScheduler @Inject constructor(
 ) : SolatAlarmScheduler {
 
     override fun schedule(item: SolatAlarmItem) {
-        val isRtl = context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
-
-        val formattedPrayerTime = Instant.ofEpochMilli(item.triggerAtMillis)
-            .atZone(ZoneId.systemDefault())
-            .toLocalTime()
-            .format(DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault()))
-            .lowercase()
-
-        val prayerName = context.getString(item.prayerName.resId)
-        val prayerTime = if (isRtl) formattedPrayerTime.toJawiNumerals() else formattedPrayerTime
-
-        val intent =
-            Intent(context, SolatAlarmReceiver::class.java).apply {
-                action = "my.naqibrafiqi.solat.ACTION_TRIGGER_PRAYER_ALARM"
-                putExtra("EXTRA_PRAYER_NAME", prayerName)
-                putExtra("EXTRA_PRAYER_TIME", prayerTime)
-                putExtra("EXTRA_ALARM_ID", item.id)
-            }
-
-        val pendingIntent =
-            PendingIntent.getBroadcast(
-                context,
-                item.id,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            item.id,
+            alarmIntent()
+                .putExtra(SolatAlarmReceiver.EXTRA_ALARM_ID, item.id)
+                .putExtra(SolatAlarmReceiver.EXTRA_TRIGGER_AT_MILLIS, item.triggerAtMillis),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                // Android 12+ (API 31) (alarm permission is required and denied by default)
-                if (alarmManager.canScheduleExactAlarms()) {
-                    // Permission allowed, use exact alarm (more accurate)
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        item.triggerAtMillis,
-                        pendingIntent
-                    )
-                } else {
-                    // If permission denied, use inexact alarm (less accurate)
-                    alarmManager.setAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        item.triggerAtMillis,
-                        pendingIntent
-                    )
-                }
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // Android 6 to 11 (no explicit alarm permission)
+            val canScheduleExact =
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
+
+            if (canScheduleExact) {
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     item.triggerAtMillis,
                     pendingIntent
                 )
             } else {
-                // Below Android 6 (no need alarm permission)
-                alarmManager.setExact(
+                // Exact alarms aren't allowed (Android 12+ denies them by default): the alarm may
+                // go off a few minutes late. It's scheduled again as exact once they're allowed.
+                alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     item.triggerAtMillis,
                     pendingIntent
                 )
             }
         } catch (e: SecurityException) {
-            e.printStackTrace()
+            Log.w(TAG, "Couldn't schedule the ${item.prayerName} alarm", e)
         }
     }
 
     override fun cancel(item: SolatAlarmItem) {
-        val intent = Intent(context, SolatAlarmReceiver::class.java)
-
+        // Must match the intent schedule() used (same action and component; extras are ignored),
+        // or FLAG_NO_CREATE finds nothing and the alarm stays scheduled.
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             item.id,
-            intent,
+            alarmIntent(),
             PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
         )
 
         if (pendingIntent != null) {
             alarmManager.cancel(pendingIntent)
+            pendingIntent.cancel()
         }
     }
 
+    private fun alarmIntent(): Intent =
+        Intent(context, SolatAlarmReceiver::class.java)
+            .setAction(SolatAlarmReceiver.ACTION_TRIGGER_PRAYER_ALARM)
+
+    private companion object {
+        const val TAG = "SolatAlarmScheduler"
+    }
 }

@@ -32,6 +32,7 @@ import my.naqibrafiqi.solat.domain.model.enums.PrayerName
 import my.naqibrafiqi.solat.domain.repository.SolatRepository
 import my.naqibrafiqi.solat.domain.usecase.ScheduleNextPrayersUseCase
 import my.naqibrafiqi.solat.util.states.Resource
+import java.time.Clock
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -43,7 +44,8 @@ import kotlin.time.Duration.Companion.milliseconds
 class DailyPrayerViewModel @Inject constructor(
     private val dataStore: SolatDataStore,
     private val solatRepository: SolatRepository,
-    private val scheduleNextPrayers: ScheduleNextPrayersUseCase
+    private val scheduleNextPrayers: ScheduleNextPrayersUseCase,
+    private val clock: Clock
 ) : ViewModel() {
 
     private val _zoneCode: Flow<String?> =
@@ -72,7 +74,8 @@ class DailyPrayerViewModel @Inject constructor(
                 initialValue = null
             )
 
-    private val _dateTrigger = MutableStateFlow(LocalDate.now())
+    // Today's date in Malaysia time. Changing it loads the prayers for the new day.
+    private val _dateTrigger = MutableStateFlow(LocalDate.now(clock))
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val todayAndTomorrowPrayers: StateFlow<List<DailyPrayer>> =
@@ -131,12 +134,19 @@ class DailyPrayerViewModel @Inject constructor(
 
     private suspend fun runCountdownLoop(dailyPrayers: List<DailyPrayer>) {
         while (currentCoroutineContext().isActive) {
+            if (refreshIfDateChanged()) {
+                return
+            }
+
             val nextTarget = getNextPrayer(dailyPrayers)
 
             if (nextTarget == null) {
-                // Once it reached midnight/run out of next prayer, trigger new date
-                _dateTrigger.update { LocalDate.now() }
-                break
+                // No later prayer is loaded (e.g. tomorrow's times couldn't be downloaded).
+                // Wait: at midnight the date changes and the prayers are loaded again.
+                _nextPrayer.update { null }
+                _countdownText.update { "--:--:--" }
+                delay(1000.milliseconds)
+                continue
             }
 
             val (prayer, targetTime) = nextTarget
@@ -151,10 +161,25 @@ class DailyPrayerViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Moves [_dateTrigger] to today if midnight has passed, which loads the new day's prayers and
+     * restarts the countdown. Returns true if the date changed.
+     */
+    private fun refreshIfDateChanged(): Boolean {
+        val today = LocalDate.now(clock)
+
+        if (today == _dateTrigger.value) {
+            return false
+        }
+
+        _dateTrigger.update { today }
+        return true
+    }
+
     private fun getNextPrayer(
         dailyPrayers: List<DailyPrayer>
     ): Pair<PrayerTime, LocalDateTime>? {
-        val now = LocalDateTime.now()
+        val now = LocalDateTime.now(clock)
 
         return dailyPrayers.flatMap { dailyPrayer ->
             dailyPrayer.prayerTimes
@@ -170,7 +195,12 @@ class DailyPrayerViewModel @Inject constructor(
 
     private fun startCountdown(targetTime: LocalDateTime): Flow<String?> = flow {
         while (true) {
-            val now = LocalDateTime.now()
+            val now = LocalDateTime.now(clock)
+
+            // The countdown to Subuh runs past midnight: switch to the new day's prayers.
+            if (refreshIfDateChanged()) {
+                break
+            }
 
             if (!now.isBefore(targetTime)) {
                 emit("00:00:00")

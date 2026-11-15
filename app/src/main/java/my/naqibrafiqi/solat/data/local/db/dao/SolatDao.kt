@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import my.naqibrafiqi.solat.data.local.db.entity.PrayerDetailsEntity
 import my.naqibrafiqi.solat.data.local.db.entity.PrayerTimeEntity
@@ -22,13 +23,29 @@ interface SolatDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPrayerTimes(prayerTimeEntities: List<PrayerTimeEntity>): List<Long>
 
+    /**
+     * Saves one month of prayer times. The month's details and its days are written together, so
+     * a month is never left saved without its days. Saving a month that's already saved replaces
+     * it (and, through the foreign key, its old days).
+     */
+    @Transaction
+    suspend fun insertMonthlyPrayers(
+        prayerDetailsEntity: PrayerDetailsEntity,
+        prayerTimeEntities: List<PrayerTimeEntity>
+    ) {
+        val prayerDetailsId = insertPrayerDetails(prayerDetailsEntity).toInt()
+
+        insertPrayerTimes(prayerTimeEntities.map { it.copy(prayerDetailsId = prayerDetailsId) })
+    }
+
+    /** Deletes every month before [year]/[month], with its days. */
     @Query(
         value = """
             DELETE FROM prayer_details 
-            WHERE year = :year AND month_number = :month
+            WHERE (year * 12 + month_number) < (:year * 12 + :month)
         """
     )
-    suspend fun deleteAllPastPrayerTimes(year: Int, month: Int): Int
+    suspend fun deletePrayerTimesBefore(year: Int, month: Int): Int
 
     @Query(
         value = """
@@ -68,11 +85,22 @@ interface SolatDao {
                 pt.updated_date AS pt_updated_date, 
                 pt.deleted_date AS pt_deleted_date
             FROM prayer_details pd 
-            LEFT JOIN prayer_times pt ON pt.prayer_details_id = pd.prayer_details_id AND pt.day IN (:todayDay, :tomorrowDay) AND pt.deleted_date IS NULL 
-            WHERE pd.zone_id = :zoneId AND pd.year IN (:todayYear, :tomorrowYear) AND pd.month_number IN (:todayMonth, :tomorrowMonth)AND pd.deleted_date IS NULL 
+            INNER JOIN prayer_times pt ON pt.prayer_details_id = pd.prayer_details_id 
+            WHERE pd.zone_id = :zoneId 
+                AND pd.deleted_date IS NULL 
+                AND pt.deleted_date IS NULL 
+                AND (
+                    (pd.year = :todayYear AND pd.month_number = :todayMonth AND pt.day = :todayDay) 
+                    OR (pd.year = :tomorrowYear AND pd.month_number = :tomorrowMonth AND pt.day = :tomorrowDay)
+                ) 
             ORDER BY pd.year, pd.month_number, pt.day
         """
     )
+    /**
+     * Today's and tomorrow's prayer times, in date order: two rows when both days are saved.
+     * Each day is matched by its full date, so on the last day of a month "tomorrow" is the 1st of
+     * the next month (not the 1st of the same month).
+     */
     fun loadPrayerForTodayAndTomorrow(
         zoneId: Int,
         todayYear: Int,
